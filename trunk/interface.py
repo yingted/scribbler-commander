@@ -2,10 +2,10 @@
 import cherrypy
 import os
 
-class HelloWorld(object):
+class ScribblerCommander(object):
 	pass
 
-cherrypy.quickstart(HelloWorld(),config={
+cherrypy.quickstart(ScribblerCommander(),config={
 	'/' : {
 		'tools.staticfile.root' : os.path.dirname(os.path.abspath(__file__)),
 		'tools.staticfile.on' : True,
