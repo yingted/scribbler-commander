@@ -7,7 +7,7 @@ python: root/lib/python2.4 myro
 	>> python echo LD_LIBRARY_PATH='$(CURDIR)/root/lib' PATH='$(CURDIR)/root/bin':"$$PATH" PYTHONPATH='$(CURDIR)/root/lib/python2.4':root/lib/python2.4/site-packages:/usr/lib64/python2.7/site-packages:/usr/lib/python2.7/site-packages exec python '"$$@"'
 	chmod +x python
 root/lib/python2.4: Python-2.4.4
-	cd Python-2.4.4 && export LD_LIBRARY_PATH=$(CURDIR)/root/lib && make && ./python setup.py build && make install
+	cd Python-2.4.4 && export LD_LIBRARY_PATH=$(CURDIR)/root/lib && $(MAKE) && ./python setup.py build && $(MAKE) install
 Python-2.4.4: root/lib/libtk8.5.so
 	curl 'http://www.python.org/ftp/python/2.4.4/Python-2.4.4.tar.bz2' | tar xj
 	cd Python-2.4.4 && LD_LIBRARY_PATH=$(CURDIR)/root/lib LDFLAGS=-L$(CURDIR)/root/lib CPPFLAGS=-I$(CURDIR)/root/include ./configure -C --prefix=$(CURDIR)/root
@@ -15,11 +15,11 @@ tcl8.5.15:
 	wget 'http://downloads.sourceforge.net/project/tcl/Tcl/8.5.15/tcl8.5.15-src.tar.gz' -O- | tar xmz
 	cd tcl8.5.15/unix && ./configure -C --prefix=$(CURDIR)/root --enable-threads
 root/lib/libtcl8.5.so: tcl8.5.15
-	cd tcl8.5.15/unix && make install
+	cd tcl8.5.15/unix && $(MAKE) install
 tk8.5.15: root/lib/libtcl8.5.so
 	wget 'http://downloads.sourceforge.net/project/tcl/Tcl/8.5.15/tk8.5.15-src.tar.gz' -O- | tar xmz
 root/lib/libtk8.5.so: root/lib/libtcl8.5.so tk8.5.15
-	cd tk8.5.15/unix && ./configure -C --prefix=$(CURDIR)/root --enable-threads --with-tcl=$(CURDIR)/root/lib && make install
+	cd tk8.5.15/unix && ./configure -C --prefix=$(CURDIR)/root --enable-threads --with-tcl=$(CURDIR)/root/lib && $(MAKE) install
 myro: myro-2.9.1.zip
 	unzip -o myro-2.9.1.zip
 pyserial-2.2: pyserial-2.2.zip
