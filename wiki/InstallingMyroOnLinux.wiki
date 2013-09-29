@@ -17,6 +17,8 @@ For development, the simulator will be launched. Beeps will be printed to the se
 You will need:
   * make, gcc, etc.
   * numpy, etc.
+  * 250 MB free space
+  * network
 
 Instructions:
   * In `lib/`, type `make`. After everything installs, you should get a Python prompt.
