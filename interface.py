@@ -18,6 +18,9 @@ else:
 	# start a new simulator
 	myro.simulator()
 
+if not hasattr(robot, "robotinfo"): # prevent KeyError on KeyboardInterrupt
+	robot.robotinfo = {}
+
 class ScribblerCommander(object):
 	@cherrypy.expose
 	def index(self, do=None):
