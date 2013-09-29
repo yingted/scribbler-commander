@@ -1,0 +1,23 @@
+#summary Roadmap for the scribbler interface
+
+= Introduction =
+
+The interface should support:
+  # basic browsers
+  # desktop browsers (with AJAX)
+  # mobile/low-resolution browsers
+  # REST clients
+
+= Details =
+
+The plan is to use progressive enhancement, except allow ourselves to break clients older than ourselves.
+
+Appearance:
+  # basic form
+  # style the page
+  # AJAX and animations
+
+Internals:
+  # HTML form interface (through POST)
+  # provide second RESTful interface for use with AJAX
+  # possibly use `cherrypy-jsonrpcserver` and JSON-RPC if we're feeling ambitious
