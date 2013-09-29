@@ -13,8 +13,7 @@ try:
 	s.close()
 except socket.error, e:
 	# simulator is running, so wait and connect to it
-	from myro.robots.simulator import SimScribbler
-	robot = myro.globvars.robot = SimScribbler(None)
+	robot = myro.globvars.robot = myro.robots.simulator.SimScribbler(None)
 else:
 	# start a new simulator
 	myro.simulator()
