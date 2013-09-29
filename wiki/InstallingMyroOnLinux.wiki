@@ -21,8 +21,8 @@ You will need:
   * network
 
 Instructions:
-  * In `lib/`, type `make`. After everything installs, you should get a Python prompt.
-  * Run `simulator()` to see if the simulator starts.
-  * Run `forward(1)`.
-  * In the project root, type `make` to start the server. The simulator should automatically open. The default recipe should kill any existing simulators.
-  * Edit interface.py and the server will automatically reload the code. Depending on your editor, the automatic reloading may occasionally fail due to a race condition, but this only happens during development.
+  # In `lib/`, type `make`. After everything installs, you should get a Python prompt.
+  # Run `simulator()` to see if the simulator starts.
+  # Run `forward(1)`.
+  # In the project root, type `make` to start the server. The simulator should automatically open. The default recipe should kill any existing simulators.
+  # Edit interface.py and the server will automatically reload the code. Depending on your editor, the automatic reloading may occasionally fail due to a race condition, but this only happens during development.
