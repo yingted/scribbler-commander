@@ -1,10 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<title></title>
-</head>
-<body>
-	Hello, world, people!
-</body>
+	<head>
+		<meta charset="UTF-8">
+		<title>commander</title>
+		<style>
+			#photo{
+				float:right;
+				width:100px;
+				height:100px;
+				border:1px solid black;
+			}
+		</style>
+	</head>
+	<body>
+		<form method="post">
+			<img id="photo">
+			<fieldset>
+				<input type="submit" name="do" value="stop">
+				<br>
+				<input type="submit" name="do" value="backward">
+				<input type="submit" name="do" value="forward">
+				<br>
+				<input type="submit" name="do" value="left">
+				<input type="submit" name="do" value="right">
+				<br>
+				<input type="submit" name="do" value="take a photo">
+			</fieldset>
+			<fieldset>
+				<label for="speed">speed</label>
+				<input id="speed">
+				<br>
+				<label for="battery">battery</label>
+				<input id="battery">
+			</fieldset>
+		</form>
+	</body>
 </html>
