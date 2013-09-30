@@ -3,6 +3,7 @@ import cherrypy
 import os
 import myro
 import socket
+import datetime
 
 # connect to myro
 try:
@@ -23,15 +24,22 @@ if not hasattr(robot, "robotinfo"): # prevent KeyError on KeyboardInterrupt
 
 class ScribblerCommander(object):
 	@cherrypy.expose
-	def index(self, do=None):
+	def index(self, do=None,**kwargs):
+		print "foo"
 		# check if action is safe
 		if do in ("forward", "backward", "stop", "left", "right"):
 			# TODO replace with a proper RPC mechanism
 			# and expose REST API
 			getattr(self,do)()
 		# switch POST to a GET
+		elif do in ("go"):
+		    getattr(self,do)(kwargs.get('actionSelection'))
 		raise cherrypy.HTTPRedirect('/')
-	# some simple methods, which will be decorated later
+	def go(self,actionSelection=None):
+            if actionSelection=="circle":
+                # TODO ADD FUNCTION HERE AND START REPLACING FROM THIS LINE
+                myro.forward(2)
+                # END REPLACE
 	def forward(self):
 		myro.forward(1)
 	def backward(self):
