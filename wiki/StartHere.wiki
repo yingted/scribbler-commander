@@ -13,4 +13,7 @@ Then, of available tasks, take whatever you could handle in the specified timefr
 == Note ==
 This wiki is yours too; so please make wikipages for documentation and stuff, brainstorm, whatever. The more documented our project is, the better our reports and thus mark will be.
 
+= Overall Project Roadmap =
+See Issues->Milestone0.1
+
 
