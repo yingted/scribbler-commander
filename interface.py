@@ -43,11 +43,17 @@ class ScribblerCommander(object):
 	def stop(self):
 		myro.stop()
 
+current_dir = os.path.dirname(os.path.abspath(__file__))
 cherrypy.quickstart(ScribblerCommander(),config={
 	'/' : {
-		'tools.staticfile.root' : os.path.dirname(os.path.abspath(__file__)),
+		'tools.staticdir.root' : current_dir,
+		'tools.staticfile.root' : current_dir,
 		'tools.staticfile.on' : True,
 		'tools.staticfile.filename' : 'index.html',
 		'tools.staticfile.match' : '^/$', # only match the exact url /
-	}
+	},
+	'/static' : {
+		'tools.staticdir.on' : True,
+		'tools.staticdir.dir' : 'static',
+	},
 })
