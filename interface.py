@@ -3,7 +3,7 @@ import cherrypy
 import os
 import myro
 import socket
-
+robotConnected = 1
 # connect to myro
 try:
 	s=socket.socket()
@@ -14,9 +14,11 @@ try:
 except socket.error, e:
 	# simulator is running, so wait and connect to it
 	robot = myro.globvars.robot = myro.robots.simulator.SimScribbler(None)
+	robotConnected = 0
 else:
 	# start a new simulator
 	myro.simulator()
+	robotConnected = 0
 
 if not hasattr(robot, "robotinfo"): # prevent KeyError on KeyboardInterrupt
 	robot.robotinfo = {}
@@ -42,6 +44,12 @@ class ScribblerCommander(object):
 		myro.turn(-1)
 	def stop(self):
 		myro.stop()
+	@cherrypy.expose
+	def battery(self):
+		if robotConnected == 1:
+			return str(myro.getBattery()/9.00)
+		else:
+			return "Robot unconnected"
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 cherrypy.quickstart(ScribblerCommander(),config={
