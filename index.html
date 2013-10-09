@@ -35,5 +35,17 @@
 				<input id="battery">
 			</fieldset>
 		</form>
+		<script>
+			$(function(){
+				(function update(){
+					$.get("/battery")
+						.done(function(data){
+							$("#battery").val(data);
+						}).always(function(){
+							setTimeout(update,10000);
+						});
+				})();
+			});
+		</script>
 	</body>
 </html>
