@@ -44,7 +44,11 @@ class ScribblerCommander(object):
 		myro.stop()
 	@cherrypy.expose
 	def battery(self):
-		return str(myro.getBattery()/9.)
+		try:
+			return str(myro.getBattery()/9.)
+		except AttributeError:
+			raise cherrypy.HTTPError(503, 'Service Unavailable')
+
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 cherrypy.quickstart(ScribblerCommander(),config={
