@@ -27,9 +27,9 @@ if _use_simulator:
 else:
 	connected = False
 	if sys.platform=='darwin': #different port name for mac os
-		initialize('/dev/tty.scribbler')
+		myro.initialize('/dev/tty.scribbler')
 	else:
-		initialize('COM40')
+		myro.initialize('COM40')
 	connected = True
 
 class ScribblerCommander(object):
