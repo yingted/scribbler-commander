@@ -3,23 +3,34 @@ import cherrypy
 import os
 import myro
 import socket
+import sys
+_use_simulator = False
+connected = False
 
-# connect to myro
-try:
-	s=socket.socket()
-	s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-	# test if simulator is running
-	s.bind(("127.0.0.1", 60000))
-	s.close()
-except socket.error, e:
-	# simulator is running, so wait and connect to it
-	robot = myro.globvars.robot = myro.robots.simulator.SimScribbler(None)
+if _use_simulator:
+	# connect to myro
+	try:
+		s=socket.socket()
+		s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+		# test if simulator is running
+		s.bind(("127.0.0.1", 60000))
+		s.close()
+	except socket.error, e:
+		# simulator is running, so wait and connect to it
+		robot = myro.globvars.robot = myro.robots.simulator.SimScribbler(None)
+	else:
+		# start a new simulator
+		myro.simulator()
+		connected = True
+	if not hasattr(robot, "robotinfo"): # prevent KeyError on KeyboardInterrupt
+		robot.robotinfo = {}
 else:
-	# start a new simulator
-	myro.simulator()
-
-if not hasattr(robot, "robotinfo"): # prevent KeyError on KeyboardInterrupt
-	robot.robotinfo = {}
+	connected = False
+	if sys.platform=='darwin': #different port name for mac os
+		initialize('/dev/tty.scribbler')
+	else:
+		initialize('COM40')
+	connected = True
 
 class ScribblerCommander(object):
 	@cherrypy.expose
