@@ -5,7 +5,7 @@
   * for every type of motion, update relative position
   * we could monkeypatch - ugly implementation, beautiful interface
    * Myro will be monkeypatched to record positions
-    * _updateSpeed? or some other "private" function
+    * `_`updateSpeed? or some other "private" function
  * Obstacle Detection
   * How it works: sends out IR of a certain power 
   * Light reflects, at a certain power
@@ -15,7 +15,5 @@
 
 = Milestone =
 To be done by Initial project demo
-
-
 
 
