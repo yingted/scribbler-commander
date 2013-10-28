@@ -15,5 +15,13 @@
 
 = Milestone =
 To be done by Initial project demo
+*Note: wiki says demo is due on Lab Session of October 31.
 
+Overview of what needs to be done by initial project demo:
+  *Avoiding objects challenge
+    Must not touch the obstacle and find an alternative route
+    Obstacle is no taller than 10 cm
+    Chosen route to "go around" should be no more than 20 cm from the obstacle (minimize distance while still keeping it safe)
+  *Present the advances on the project functionality
+    What has been done so far and been worked upon
 
