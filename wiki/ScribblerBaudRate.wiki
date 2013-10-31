@@ -1,0 +1,15 @@
+#summary Why it's slow
+#labels Phase-Implementation
+
+= Introduction =
+
+We use RFCOMM/BT SPP and 8N1 38400 baud, but this can be changed. (http://archive.is/4Gcr3)
+
+= Details =
+
+To increase rate to 3686400 baud:
+try:
+    self.lock.acquire()
+    self.ser.write('\x84\x01\x0c\x00\x08')
+finally:
+    self.lock.release()
