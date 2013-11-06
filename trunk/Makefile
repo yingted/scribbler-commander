@@ -7,7 +7,7 @@ lib/python:
 	$(MAKE) -C lib python
 data.pickle:
 	$(PYTHON) record-data.py data.pickle
-prior.pickle: data.pickle
+prior.pickle: data.pickle make-prior.py
 	./make-prior.py data.pickle prior.pickle
 .PHONY: run kill
 .PRECIOUS: data.pickle

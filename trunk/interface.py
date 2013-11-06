@@ -27,7 +27,7 @@ if _use_simulator:
 		robot.robotinfo = {}
 else:
 	connected = False
-	xp_initialize()
+	util.xp_initialize()
 	connected = True
 
 class ScribblerCommander(object):
