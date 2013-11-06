@@ -10,7 +10,7 @@ CALCULATE_OFFSET = False #Only should work in theory if offset is linearly propo
 PRINTING_DIGITS = 4
 if(DEBUGMODE):
     ROBOT_DIAMETER = 2#Assumes radius 1 in debugmode
-ROBOT_RADIUS = ROBOT_DIAMETER>>1
+ROBOT_RADIUS = ROBOT_DIAMETER/2
 EPSILON = 0.0001
 #Variables
 x_pos = 0
