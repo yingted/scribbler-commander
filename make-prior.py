@@ -33,14 +33,14 @@ if __name__=="__main__":
 			i=arange(N+1)
 			sigma=weight**-.5
 
-			d=zeros(N+1)
+			mu=zeros(N+1)
 			for i,(left,right,w)in enumerate(vals):
-				d[dx*i]+=left*w
-				d[dx*(i+1)]+=right*w
-			d/=weight
+				mu[dx*i]+=left*w
+				mu[dx*(i+1)]+=right*w
+			mu/=weight
 			data[ent['irp']]={
-				'd':d,
-				'sigma':sigma,
+				'mu':map(float,mu),
+				'sigma':map(float,sigma),
 			}
 	with open(argv[2],'w')as f:
 		dump(data,f)

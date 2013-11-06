@@ -1,6 +1,6 @@
 shell: python root/lib/python2.4/site-packages/PIL.pth pyserial-2.2
 	./python -ic 'import myro;from myro import *'
-python: root/lib/python2.4 myro
+python: root/lib/python2.4 myro root/lib/python2.4/site-packages/numpy root/lib/python2.4/site-packages/scipy
 	[ -h root/lib/python2.4/site-packages/myro ] || ln -s ../../../../myro root/lib/python2.4/site-packages
 	[ -h root/lib/python2.4/site-packages/serial ] || ln -s ../../../../pyserial-2.2/serial root/lib/python2.4/site-packages
 	> python echo \#!/bin/sh
@@ -31,5 +31,13 @@ pyserial-2.2.zip:
 Imaging-1.1.7:
 	wget -O- http://effbot.org/downloads/Imaging-1.1.7.tar.gz | tar xz
 root/lib/python2.4/site-packages/PIL.pth: Imaging-1.1.7
-	cd Imaging-1.1.7 && ../python setup.py install
+	cd $< && ../python setup.py install
+numpy-1.7.1:
+	wget -O- 'http://downloads.sourceforge.net/project/numpy/NumPy/1.7.1/numpy-1.7.1.tar.gz' | tar xz
+root/lib/python2.4/site-packages/numpy: numpy-1.7.1
+	cd $< && ../python setup.py install
+scipy-0.11.0:
+	wget -O- 'http://downloads.sourceforge.net/project/scipy/scipy/0.11.0/scipy-0.11.0.tar.gz' | tar xz
+root/lib/python2.4/site-packages/scipy: scipy-0.11.0
+	cd $< && ../python setup.py install
 .PHONY: shell python
