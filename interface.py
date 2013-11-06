@@ -2,6 +2,7 @@
 import cherrypy
 import os
 import myro
+import util
 import socket
 import sys
 _use_simulator = False
@@ -26,10 +27,7 @@ if _use_simulator:
 		robot.robotinfo = {}
 else:
 	connected = False
-	if sys.platform=='darwin': #different port name for mac os
-		myro.initialize('/dev/tty.scribbler')
-	else:
-		myro.initialize('COM40')
+	xp_initialize()
 	connected = True
 
 class ScribblerCommander(object):
