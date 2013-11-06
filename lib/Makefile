@@ -4,7 +4,7 @@ python: root/lib/python2.4 myro
 	[ -h root/lib/python2.4/site-packages/myro ] || ln -s ../../../../myro root/lib/python2.4/site-packages
 	[ -h root/lib/python2.4/site-packages/serial ] || ln -s ../../../../pyserial-2.2/serial root/lib/python2.4/site-packages
 	> python echo \#!/bin/sh
-	>> python echo LD_LIBRARY_PATH='$(CURDIR)/root/lib' PATH='$(CURDIR)/root/bin':"$$PATH" PYTHONPATH='$(CURDIR)/root/lib/python2.4':root/lib/python2.4/site-packages:/usr/lib64/python2.7/site-packages:/usr/lib/python2.7/site-packages exec python '"$$@"'
+	>> python echo LD_LIBRARY_PATH='$(CURDIR)/root/lib' PATH='$(CURDIR)/root/bin':"$$PATH" PYTHONPATH='$(CURDIR)/root/lib/python2.4':$(CURDIR)/root/lib/python2.4/site-packages:/usr/lib64/python2.7/site-packages:/usr/lib/python2.7/site-packages exec python '"$$@"'
 	chmod +x python
 root/lib/python2.4: Python-2.4.4
 	cd Python-2.4.4 && export LD_LIBRARY_PATH=$(CURDIR)/root/lib && $(MAKE) && ./python setup.py build && $(MAKE) install
