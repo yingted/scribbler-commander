@@ -100,7 +100,8 @@ if __name__=='__main__':
 			hist.append(dist)
 			yield dist
 	d = iter(islice(distances(), 8, None))
-	target = 0., 1.
+	#target = 0., 1.
+	target = 0., 2.
 	class DestinationReached(Exception): pass
 	def getBearing():
 		dist, bearing = deadreckoning.distTo(*target)
@@ -142,14 +143,14 @@ if __name__=='__main__':
 
 				bearing = getBearing()
 				print 'bearing', bearing
-				if bearing >= 0:
+				if bearing <= 0:
 					break
 
 				print 'wall following'
 				moveforward(.2)
 
 			print 'turning towards target'
-			turnside(bearing, left=False)
+			turnside(-bearing, left=False)
 	except KeyboardInterrupt:
 		pass
 	except DestinationReached:

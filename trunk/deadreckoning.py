@@ -9,7 +9,7 @@ def _update():
     otime = _time
     _time = time()
     def f(x):
-	    return cmp(x, 0) * abs((x - 100) / 100)**.75
+	    return cmp(x, 100) * abs((x - 100) / 100)**.75
     update(f(_left), f(_right), _time - otime)
     print 'getCoords', getCoords(PRINTING_DIGITS)
 def _newSet(self, *values):
