@@ -1,11 +1,20 @@
+import myro.robots.scribbler2
+_oldAdjustSpeed = myro.robots.scribbler2.Scribbler._adjustSpeed
+def _newAdjustSpeed(self):
+    left = min(max(self._lastTranslate - self._lastRotate, -1), 1)
+    right = min(max(self._lastTranslate + self._lastRotate, -1), 1)
+    print "left", left, "right", right
+    _oldAdjustSpeed(self)
+myro.robots.scribbler2.Scribbler._adjustSpeed = _newAdjustSpeed
+
 from math import *
 #import myro
 from time import sleep
 #Constants
 SPEED_CONSTANT = 0.147#Measured
-ROBOT_DIAMETER = 0.15#Measured
+ROBOT_DIAMETER = 0.15#Measuredp=
 DEBUGMODE = True
-PRINT_COORDS = True
+PRINT_COORDS = False
 CALCULATE_OFFSET = False #Only should work in theory if offset is linearly proportionate to angle turned
 PRINTING_DIGITS = 4
 if(DEBUGMODE):
@@ -16,6 +25,7 @@ EPSILON = 0.0001
 x_pos = 0
 y_pos = 0
 robotHeading = 0
+positions = []
 
 #Robot headings are rotated clockwise = positive, counterclockwise = negative
 def deadReckoning(leftMotorConstant,rightMotorConstant,deltaTime):
@@ -47,7 +57,7 @@ OFFSET_X_RATIO = 0.045/(32*pi) #very unprecise calculation
 #after 16 full rotations counterclockwise, x increases by <UNMEASURED> > 0
 #check if linearly proportionate
 def update(leftMotorConstant,rightMotorConstant,deltaTime,isSpeed=False):
-    global x_pos, y_pos, robotHeading
+    global x_pos, y_pos, robotHeading,positions
     if(isSpeed):
         leftMotorConstant = leftMotorConstant/SPEED_CONSTANT
         rightMotorConstant = rightMotorConstant/SPEED_CONSTANT
@@ -75,6 +85,8 @@ def update(leftMotorConstant,rightMotorConstant,deltaTime,isSpeed=False):
     robotHeading = (robotHeading+dR[0]+pi)%(2*pi)-pi
     x_pos = x_pos+dR[1]
     y_pos = y_pos-dR[2]
+    currentPos = [x_pos,y_pos,robotHeading]
+    positions.append(currentPos)
     if(PRINT_COORDS):
         getCoords(PRINTING_DIGITS)
 
