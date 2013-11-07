@@ -1,19 +1,30 @@
-'''import myro.robots.scribbler2
-_oldAdjustSpeed = myro.robots.scribbler2.Scribbler._adjustSpeed
-def _newAdjustSpeed(self):
-    left = min(max(self._lastTranslate - self._lastRotate, -1), 1)
-    right = min(max(self._lastTranslate + self._lastRotate, -1), 1)
-    print "left", left, "right", right
-    _oldAdjustSpeed(self)
-myro.robots.scribbler2.Scribbler._adjustSpeed = _newAdjustSpeed
-'''
+from myro.robots.scribbler import Scribbler
+from time import time
+_oldSet = Scribbler._set
+_left = 0
+_right = 0
+_time = time()
+def _update():
+    global _left, _right, _time
+    otime = _time
+    _time = time()
+    update(_left, _right, _time - otime)
+def _newSet(self, *values):
+    _update()
+    if values==(Scribbler.SET_MOTORS_OFF,):
+        _left = _right = 0
+    elif len(values)==3 and values[0]==Scribbler.SET_MOTORS:
+        _left, _right = values[1:]
+    _oldSet(self, *values)
+Scribbler._set = _newSet
+
 from math import *
-#import myro
+import myro
 from time import sleep
 #Constants
 SPEED_CONSTANT = 0.147#Measured
 ROBOT_DIAMETER = 0.15#Measuredp=
-DEBUGMODE = True
+DEBUGMODE = False
 PRINT_COORDS = False
 CALCULATE_OFFSET = False #Only should work in theory if offset is linearly proportionate to angle turned
 PRINTING_DIGITS = 4
@@ -28,6 +39,7 @@ robotHeading = 0
 positions = []
 
 def distTo(target_x,target_y):
+    _update()
     distance = ((x_pos-target_x)**2+(y_pos-target_y)**2)**0.5
     if(fabs(x_pos-target_x)<EPSILON):
         targetHeading = pi/2

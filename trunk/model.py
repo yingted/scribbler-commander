@@ -1,3 +1,4 @@
+from deadreckoning import distTo
 from pickle import load
 from numpy import arange, pi, exp, log, linspace, around, ndarray, array, ones
 from scipy.integrate import quad
@@ -57,7 +58,7 @@ if __name__=='__main__':
 	from myro import *
 	from numpy import array, set_printoptions, dot
 	from matplotlib.pyplot import *
-	from movement import moveforward
+	from movement import moveforward, turnside
 	P=Prior()
 	#R = linspace(0, P._max_r, num=300)
 	R = linspace(0, P._max_r, num=100)
@@ -99,22 +100,46 @@ if __name__=='__main__':
 			hist.append(dist)
 			yield dist
 	d = iter(islice(distances(), 8, None))
+	target = 0., 1.
 	try:
-		print 'moving to obstacle'
-		irps[:] = 140,
-		d.next()
-		forward(.8)
-		while d.next() > .25: pass
+		while True:
+			print 'moving to obstacle'
+			irps[:] = 140,
+			d.next()
+			forward(.8)
+			while d.next() > .25: pass
 
-		print 'turning until no obstacle'
-		irps[:] = 146,
-		motors(.1,-.1)
-		while d.next() < .32: pass
-		print 'distance:', hist[-3]
+			print 'turning until no obstacle'
+			irps[:] = 146,
+			motors(.1, -.1)
+			while d.next() < .32: pass
+			print 'distance:', hist[-3]
 
-		print 'passing obstacle'
-		moveforward(hist[-3] + .15)
+			print 'passing obstacle'
+			moveforward(hist[-3] + .15)
 
+			while True:
+				print 'locating obstacle'
+				if d.next() < .32:
+					motors(.1, -.1)
+					while d.next() < .32: pass
+				else:
+					motors(-.1, .1)
+					while d.next() >= .32: pass
+
+				print 'turning away from obstacle'
+				turnside(pi/4, left=False)
+
+				print distTo(*target)
+				bearing = input('bearing = ')
+				if bearing >= 0:
+					break
+
+				print 'wall following'
+				moveforward(.2)
+
+			print 'turning towards target'
+			turnside(bearing, left=False)
 	except KeyboardInterrupt:
 		pass
 	stop()
