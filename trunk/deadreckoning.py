@@ -10,7 +10,7 @@ def _update():
     otime = _time
     _time = time()
     def f(x):
-	    return cmp(x, 100) * abs((x - 100) / 100)**0.67016601562499989
+	    return 1.03035 * cmp(x, 100) * abs((x - 100) / 100)**0.789366
     update(f(_left), f(_right), _time - otime)
     #print 'getCoords', getCoords(PRINTING_DIGITS)
 def _newSet(self, *values):
@@ -20,6 +20,7 @@ def _newSet(self, *values):
         _left = _right = 100
     elif len(values)==3 and values[0]==Scribbler.SET_MOTORS:
         _left, _right = values[1:]
+	values = values[0], values[1], max(0, min(255, int(round((values[2] - 100) * 1.04 + 100))))
     _oldSet(self, *values)
 Scribbler._set = _newSet
 '''
@@ -28,7 +29,8 @@ from math import *
 #import myro
 from time import sleep
 #Constants
-SPEED_CONSTANT = 0.127/0.8#Measured
+SPEED_CONSTANT = 0.147#Measured
+ROBOT_DIAMETER = 0.15#Measured
 HEADING_CONSTANT = 2.094#Measured
 DEBUGMODE = False
 PRINT_COORDS = True

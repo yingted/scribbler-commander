@@ -1,4 +1,6 @@
 PYTHON=lib/python
+demo: 
+	$(PYTHON) model.py
 run: lib/python static/js/jquery-1.10.2.min.js kill
 	trap 'make kill' EXIT; lib/python interface.py
 kill:
@@ -9,5 +11,5 @@ data.pickle:
 	$(PYTHON) record-data.py data.pickle
 prior.pickle: data.pickle make-prior.py
 	./make-prior.py data.pickle prior.pickle
-.PHONY: run kill
+.PHONY: run kill demo
 .PRECIOUS: data.pickle
