@@ -40,4 +40,8 @@ scipy-0.11.0:
 	wget -O- 'http://downloads.sourceforge.net/project/scipy/scipy/0.11.0/scipy-0.11.0.tar.gz' | tar xz
 root/lib/python2.4/site-packages/scipy: scipy-0.11.0
 	cd $< && ../python setup.py install
+matplotlib-1.1.0:
+	wget 'http://downloads.sourceforge.net/project/matplotlib/matplotlib/matplotlib-1.1.0/matplotlib-1.1.0.tar.gz' -O- | tar xz
+root/lib/python2.4/site-packages/matplotlib: matplotlib-1.1.0
+	cd $< && ../python setup.py install
 .PHONY: shell python
