@@ -1,22 +1,22 @@
 from myro.robots.scribbler import Scribbler
 from time import time
 _oldSet = Scribbler._set
-_left = 0
-_right = 0
+_left = 100
+_right = 100
 _time = time()
 def _update():
     global _left, _right, _time
     otime = _time
     _time = time()
     def f(x):
-	    return cmp(x, 100) * abs((x - 100) / 100)**.75
+	    return cmp(x, 100) * abs((x - 100) / 100)**0.67016601562499989
     update(f(_left), f(_right), _time - otime)
-    print 'getCoords', getCoords(PRINTING_DIGITS)
+    #print 'getCoords', getCoords(PRINTING_DIGITS)
 def _newSet(self, *values):
     global _left, _right
     _update()
     if values==(Scribbler.SET_MOTORS_OFF,):
-        _left = _right = 0
+        _left = _right = 100
     elif len(values)==3 and values[0]==Scribbler.SET_MOTORS:
         _left, _right = values[1:]
     _oldSet(self, *values)
@@ -88,7 +88,7 @@ OFFSET_X_RATIO = 0.045/(32*pi) #very unprecise calculation
 #check if linearly proportionate
 def update(leftMotorConstant,rightMotorConstant,deltaTime,isSpeed=False):
     global x_pos, y_pos, robotHeading,positions
-    print "update:", leftMotorConstant, rightMotorConstant, deltaTime
+    #print "update:", leftMotorConstant, rightMotorConstant, deltaTime
     if(isSpeed):
         
         leftMotorConstant = leftMotorConstant/SPEED_CONSTANT
@@ -111,7 +111,7 @@ def update(leftMotorConstant,rightMotorConstant,deltaTime,isSpeed=False):
     #    myro.stop()
     #dead reckoning position calculations
     dR = deadReckoning(leftMotorConstant,rightMotorConstant,deltaTime)
-    print 'dR', dR
+    #print 'dR', dR
     if(CALCULATE_OFFSET):
         y_pos += fabs(dR[0])*OFFSET_Y_RATIO
         x_pos += fabs(dR[0])*OFFSET_X_RATIO

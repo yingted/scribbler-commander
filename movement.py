@@ -20,6 +20,9 @@ def moveforward(distance=1, fwd=True):
 
 def turnside(radians=PI, left=True):
     """rotates in a direction (1.99rad/sec)"""
+    if radians < 0:
+        radians = -radians
+        left = not left
     if left:
         d=1
     else:

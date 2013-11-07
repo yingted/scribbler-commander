@@ -100,16 +100,19 @@ if __name__=='__main__':
 			hist.append(dist)
 			yield dist
 	d = iter(islice(distances(), 8, None))
-	#target = 0., 1.
-	target = 0., 2.
+	target = 0., 1.
 	class DestinationReached(Exception): pass
 	def getBearing():
 		dist, bearing = deadreckoning.distTo(*target)
-		print 'heading', deadreckoning.robotHeading
+		print 'heading', deadreckoning.robotHeading, 'distance', dist
 		if dist < .2:
 			print 'reached destination', dist
 			raise DestinationReached
 		return bearing
+	def debug():
+		stop()
+		print 'heading', deadreckoning.robotHeading
+		#raw_input('press enter to continue: ')
 	try:
 		while True:
 			print 'moving to obstacle'
@@ -123,6 +126,7 @@ if __name__=='__main__':
 			motors(.1, -.1)
 			while d.next() < .32: pass
 			print 'distance:', hist[-3]
+			debug()
 
 			print 'passing obstacle'
 			moveforward(hist[-3] + .15)
@@ -137,9 +141,13 @@ if __name__=='__main__':
 				else:
 					motors(-.1, .1)
 					while d.next() >= .32: pass
+				debug()
 
 				print 'turning away from obstacle'
-				turnside(pi/4, left=False)
+				#turnside(pi/4, left=False)
+				motors(.1, -.1)
+				wait(42./24.0)
+				debug()
 
 				bearing = getBearing()
 				print 'bearing', bearing
@@ -154,5 +162,5 @@ if __name__=='__main__':
 	except KeyboardInterrupt:
 		pass
 	except DestinationReached:
-		pass
+		turnside(deadreckoning.robotHeading, left=False)
 	stop()
