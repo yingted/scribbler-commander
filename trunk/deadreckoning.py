@@ -8,8 +8,12 @@ def _update():
     global _left, _right, _time
     otime = _time
     _time = time()
-    update(_left, _right, _time - otime)
+    def f(x):
+	    return cmp(x, 0) * abs((x - 100) / 100)**.75
+    update(f(_left), f(_right), _time - otime)
+    print 'getCoords', getCoords(PRINTING_DIGITS)
 def _newSet(self, *values):
+    global _left, _right
     _update()
     if values==(Scribbler.SET_MOTORS_OFF,):
         _left = _right = 0
@@ -84,7 +88,9 @@ OFFSET_X_RATIO = 0.045/(32*pi) #very unprecise calculation
 #check if linearly proportionate
 def update(leftMotorConstant,rightMotorConstant,deltaTime,isSpeed=False):
     global x_pos, y_pos, robotHeading,positions
+    print "update:", leftMotorConstant, rightMotorConstant, deltaTime
     if(isSpeed):
+        
         leftMotorConstant = leftMotorConstant/SPEED_CONSTANT
         rightMotorConstant = rightMotorConstant/SPEED_CONSTANT
     #if over max speed, scales constants so that they are below or equal to 1, and increases time proportionally
@@ -99,12 +105,13 @@ def update(leftMotorConstant,rightMotorConstant,deltaTime,isSpeed=False):
         rightMotorConstant = rightMotorConstant/scaler
         deltaTime = scaler*deltaTime
     #moves the scribbler if not in debug mode
-    if(DEBUGMODE==False):
-        myro.motors(leftMotorConstant,rightMotorConstant)
-        sleep(deltaTime)
-        myro.stop()
+    #if(DEBUGMODE==False):
+    #    myro.motors(leftMotorConstant,rightMotorConstant)
+    #    sleep(deltaTime)
+    #    myro.stop()
     #dead reckoning position calculations
     dR = deadReckoning(leftMotorConstant,rightMotorConstant,deltaTime)
+    print 'dR', dR
     if(CALCULATE_OFFSET):
         y_pos += fabs(dR[0])*OFFSET_Y_RATIO
         x_pos += fabs(dR[0])*OFFSET_X_RATIO

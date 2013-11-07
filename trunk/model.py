@@ -1,4 +1,4 @@
-from deadreckoning import distTo
+import deadreckoning
 from pickle import load
 from numpy import arange, pi, exp, log, linspace, around, ndarray, array, ones
 from scipy.integrate import quad
@@ -96,18 +96,26 @@ if __name__=='__main__':
 				#line.set_data(R, p)
 				#draw()
 				dist = dot(R, p)
-			print 'dist:', dist
+			#print 'dist:', dist
 			hist.append(dist)
 			yield dist
 	d = iter(islice(distances(), 8, None))
 	target = 0., 1.
+	class DestinationReached(Exception): pass
+	def getBearing():
+		dist, bearing = deadreckoning.distTo(*target)
+		print 'heading', deadreckoning.robotHeading
+		if dist < .2:
+			print 'reached destination', dist
+			raise DestinationReached
+		return bearing
 	try:
 		while True:
 			print 'moving to obstacle'
 			irps[:] = 140,
 			d.next()
 			forward(.8)
-			while d.next() > .25: pass
+			while d.next() > .24: getBearing()
 
 			print 'turning until no obstacle'
 			irps[:] = 146,
@@ -119,6 +127,8 @@ if __name__=='__main__':
 			moveforward(hist[-3] + .15)
 
 			while True:
+				getBearing() # check if we arrived
+
 				print 'locating obstacle'
 				if d.next() < .32:
 					motors(.1, -.1)
@@ -130,8 +140,8 @@ if __name__=='__main__':
 				print 'turning away from obstacle'
 				turnside(pi/4, left=False)
 
-				print distTo(*target)
-				bearing = input('bearing = ')
+				bearing = getBearing()
+				print 'bearing', bearing
 				if bearing >= 0:
 					break
 
@@ -141,5 +151,7 @@ if __name__=='__main__':
 			print 'turning towards target'
 			turnside(bearing, left=False)
 	except KeyboardInterrupt:
+		pass
+	except DestinationReached:
 		pass
 	stop()
