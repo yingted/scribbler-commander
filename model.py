@@ -11,8 +11,8 @@ def _floor_clip(v, lo, hi):
 class Prior(object):
 	_max_r = 1.23
 	_max_t = 50
-	_r_to_t = _max_t/_max_r
-	_sigma_theta = pi/12 #TODO measure
+	_r_to_t = _max_t / _max_r
+	_sigma_theta = pi / 12 #TODO measure
 	_max_v = 6400 #for opcode 157 with latency 400
 	def __init__(self, inp='prior.pickle'):
 		if isinstance(inp, file):
@@ -59,6 +59,7 @@ if __name__=='__main__':
 	from numpy import array, set_printoptions, dot
 	from matplotlib.pyplot import *
 	from movement import moveforward, turnside
+	from time import time
 	P=Prior()
 	#R = linspace(0, P._max_r, num=300)
 	R = linspace(0, P._max_r, num=100)
@@ -96,57 +97,80 @@ if __name__=='__main__':
 				#line.set_data(R, p)
 				#draw()
 				dist = dot(R, p)
-			#print 'dist:', dist
+			print 'dist:', dist
 			hist.append(dist)
 			yield dist
-	d = iter(islice(distances(), 8, None))
+	burnin = 8
+	d = iter(islice(distances(), burnin, None))
 	target = 0., 1.
+	margin_deg = 50.
 	class DestinationReached(Exception): pass
 	def getBearing():
 		dist, bearing = deadreckoning.distTo(*target)
-		print 'heading', deadreckoning.robotHeading, 'distance', dist
-		if dist < .2:
+		#bearing = (bearing + pi) % (2 * pi) - pi
+		#print 'heading', deadreckoning.robotHeading, 'distance', dist
+		if dist < .1:
 			print 'reached destination', dist
 			raise DestinationReached
 		return bearing
 	def debug():
 		stop()
-		print 'heading', deadreckoning.robotHeading
+		#print 'heading', deadreckoning.robotHeading / pi * 180, 'deg'
 		#raw_input('press enter to continue: ')
+	left_seconds = [0]
+	def rotation(left): # assume only one value
+		"""contract: this generator must complete"""
+		left_seconds[0] -= time() * cmp(left, 0)
+		motors(left, -left)
+		yield None
+		#left_seconds[0] += (time() + .12) * cmp(left, 0)
+		left_seconds[0] += time() * cmp(left, 0)
+		stop()
 	try:
 		while True:
 			print 'moving to obstacle'
 			irps[:] = 140,
 			d.next()
 			forward(.8)
-			while d.next() > .24: getBearing()
+			while d.next() > .25: getBearing()
 
 			print 'turning until no obstacle'
 			irps[:] = 146,
-			motors(.1, -.1)
-			while d.next() < .32: pass
+			for _ in rotation(.1):
+				while d.next() < .34: pass
 			print 'distance:', hist[-3]
 			debug()
 
 			print 'passing obstacle'
-			moveforward(hist[-3] + .15)
+			#moveforward(hist[-3] + .15)
+			forward(.8, (hist[-3] + .15) / .127)
+			stop()
 
 			while True:
 				getBearing() # check if we arrived
 
 				print 'locating obstacle'
 				if d.next() < .32:
-					motors(.1, -.1)
-					while d.next() < .32: pass
+					for _ in rotation(.1):
+						while d.next() < .32: pass
 				else:
-					motors(-.1, .1)
-					while d.next() >= .32: pass
+					exc = None
+					for _ in rotation(-.1):
+						#while d.next() >= .32: pass
+						while d.next() >= .32:
+							try:
+								if getBearing() <= -margin_deg * pi / 180:
+									break
+							except DestinationReached, exc:
+								break
+					if exc:
+						raise exc
 				debug()
 
 				print 'turning away from obstacle'
 				#turnside(pi/4, left=False)
-				motors(.1, -.1)
-				wait(42./24.0)
+				for _ in rotation(.1):
+					wait(margin_deg / 24.0)
 				debug()
 
 				bearing = getBearing()
@@ -155,12 +179,29 @@ if __name__=='__main__':
 					break
 
 				print 'wall following'
-				moveforward(.2)
+				#moveforward(.2)
+				forward(.8, .2 / .127)
 
+				stop()
+				for _ in xrange(burnin): d.next()
 			print 'turning towards target'
 			turnside(-bearing, left=False)
 	except KeyboardInterrupt:
 		pass
 	except DestinationReached:
-		turnside(deadreckoning.robotHeading, left=False)
+		#turnside(deadreckoning.robotHeading, left=False)
+		t = left_seconds[0]
+		print 'rotated right for', t
+		for _ in rotation(.1 * cmp(0, t)):
+			#wait(abs(t) * 1.12)
+			wait(abs(t))
+		stop()
+		beep(.1, 880)
+		wait(.4)
+		beep(.1, 880)
+		wait(.4)
+		beep(.5, 880)
+	except Exception:
+		stop()
+		raise
 	stop()
