@@ -1,3 +1,4 @@
+'''
 from myro.robots.scribbler import Scribbler
 from time import time
 _oldSet = Scribbler._set
@@ -21,20 +22,19 @@ def _newSet(self, *values):
         _left, _right = values[1:]
     _oldSet(self, *values)
 Scribbler._set = _newSet
+'''
 
 from math import *
-import myro
+#import myro
 from time import sleep
 #Constants
-SPEED_CONSTANT = 0.147#Measured
-ROBOT_DIAMETER = 0.15#Measuredp=
+SPEED_CONSTANT = 0.127/0.8#Measured
+HEADING_CONSTANT = 2.094#Measured
 DEBUGMODE = False
-PRINT_COORDS = False
+PRINT_COORDS = True
 CALCULATE_OFFSET = False #Only should work in theory if offset is linearly proportionate to angle turned
 PRINTING_DIGITS = 4
-if(DEBUGMODE):
-    ROBOT_DIAMETER = 2#Assumes radius 1 in debugmode
-ROBOT_RADIUS = ROBOT_DIAMETER/2
+
 EPSILON = 0.0001
 #Variables
 x_pos = 0
@@ -43,7 +43,6 @@ robotHeading = 0
 positions = []
 
 def distTo(target_x,target_y):
-    _update()
     distance = ((x_pos-target_x)**2+(y_pos-target_y)**2)**0.5
     if(fabs(x_pos-target_x)<EPSILON):
         targetHeading = pi/2
@@ -58,90 +57,26 @@ def distTo(target_x,target_y):
     return [distance,deltaHeading]
 
 #Robot headings are rotated clockwise = positive, counterclockwise = negative
-def deadReckoning(leftMotorConstant,rightMotorConstant,deltaTime):
-    leftMotorSpeed = leftMotorConstant*SPEED_CONSTANT
-    rightMotorSpeed = rightMotorConstant*SPEED_CONSTANT
+def deadReckoning(leftMotorSpeed,rightMotorSpeed,deltaTime):
     if(fabs(leftMotorSpeed-rightMotorSpeed)<EPSILON):
-        deltaX = leftMotorSpeed*deltaTime*sin(robotHeading)
-        deltaY = leftMotorSpeed*deltaTime*cos(robotHeading)
+        deltaX = leftMotorSpeed*deltaTime*sin(robotHeading)*SPEED_CONSTANT
+        deltaY = leftMotorSpeed*deltaTime*cos(robotHeading)*SPEED_CONSTANT
         return [0,deltaX,-deltaY]
     else:
-        deltaRobotHeading = (leftMotorSpeed-rightMotorSpeed)*deltaTime/ROBOT_DIAMETER
-        distRatio = ROBOT_RADIUS*(rightMotorSpeed+leftMotorSpeed)/(rightMotorSpeed-leftMotorSpeed)
-        deltaX = (cos(robotHeading+deltaRobotHeading)-cos(robotHeading))*distRatio
-        deltaY = (sin(robotHeading+deltaRobotHeading)-sin(robotHeading))*distRatio
-    return [deltaRobotHeading,deltaX,deltaY]
+        deltaRobotHeading = (leftMotorSpeed-rightMotorSpeed)*deltaTime*HEADING_CONSTANT
+        return [deltaRobotHeading, 0, 0]
 
 #change in deltaY per radian if linearly proportionate:
-#offsetYRatioFromRotation = ldexp(fdiv(mpf("0.085"),pi),-5)#(2^-5)/pi=1/(32pi)=1/(16(2pi))
-
-
-OFFSET_Y_RATIO = 0.085/(32*pi) #ratio of y offset in m per change in deltaHeading Radians
-OFFSET_X_RATIO = 0.045/(32*pi) #very unprecise calculation
-#perhaps implement code:
-#y_pos = fadd(y_pos,fmul(deltaRobotHeading,offsetYRatioFromRotation))
-#x_pos = ...same (find offset ratio)
-#after 16 full rotations clockwise, y increases by 8.5 cm +/- 1 cm
-#after 16 full rotations counterclockwise, y increases by 8.5 cm +/- 1 cm
-#after 16 full rotations clockwise, x increases by <UNMEASURED> > 0
-#after 16 full rotations counterclockwise, x increases by <UNMEASURED> > 0
-#check if linearly proportionate
-def update(leftMotorConstant,rightMotorConstant,deltaTime,isSpeed=False):
-    global x_pos, y_pos, robotHeading,positions
-    #print "update:", leftMotorConstant, rightMotorConstant, deltaTime
-    if(isSpeed):
-        
-        leftMotorConstant = leftMotorConstant/SPEED_CONSTANT
-        rightMotorConstant = rightMotorConstant/SPEED_CONSTANT
-    #if over max speed, scales constants so that they are below or equal to 1, and increases time proportionally
-    if(leftMotorConstant>1 or rightMotorConstant>1):
-        scaler = max(leftMotorConstant,rightMotorConstant)
-        leftMotorConstant = leftMotorConstant/scaler
-        rightMotorConstant = rightMotorConstant/scaler
-        deltaTime = scaler*deltaTime
-    if(leftMotorConstant<-1 or rightMotorConstant<-1):
-        scaler = abs(min(leftMotorConstant,rightMotorConstant))
-        leftMotorConstant = leftMotorConstant/scaler
-        rightMotorConstant = rightMotorConstant/scaler
-        deltaTime = scaler*deltaTime
-    #moves the scribbler if not in debug mode
-    #if(DEBUGMODE==False):
-    #    myro.motors(leftMotorConstant,rightMotorConstant)
-    #    sleep(deltaTime)
-    #    myro.stop()
-    #dead reckoning position calculations
+def update(leftMotorConstant,rightMotorConstant,deltaTime):
+    global x_pos, y_pos, robotHeading
     dR = deadReckoning(leftMotorConstant,rightMotorConstant,deltaTime)
-    #print 'dR', dR
-    if(CALCULATE_OFFSET):
-        y_pos += fabs(dR[0])*OFFSET_Y_RATIO
-        x_pos += fabs(dR[0])*OFFSET_X_RATIO
     robotHeading = (robotHeading+dR[0]+pi)%(2*pi)-pi
     x_pos = x_pos+dR[1]
     y_pos = y_pos-dR[2]
     currentPos = [x_pos,y_pos,robotHeading]
-    positions.append(currentPos)
     if(PRINT_COORDS):
         getCoords(PRINTING_DIGITS)
 
-#Completely scrapped due to errors
-'''
-#Fast but just approximation, not accurate (very bad at handling circular arcs), uses different dead reckoning algorithm
-#Don't use unless using without turning much or in very small intervals
-def updateFast(leftMotorConstant,rightMotorConstant,deltaTime,isSpeed=False):
-    global x_pos, y_pos, robotHeading
-    if(isSpeed):
-        leftMotorDistance = fmul(leftMotorConstant,deltaTime)
-        rightMotorDistance = fmul(rightMotorConstant,deltaTime)
-    else:
-        leftMotorDistance = fmul(fmul(leftMotorConstant,SPEED_CONSTANT),deltaTime)
-        rightMotorDistance = fmul(fmul(rightMotorConstant,SPEED_CONSTANT),deltaTime)
-    averageDistance = ldexp(fadd(leftMotorDistance,rightMotorDistance),-1)
-    robotHeading = fadd(robotHeading,fdiv(fsub(leftMotorDistance,rightMotorDistance),ldexp(ROBOT_DIAMETER,1)))
-    x_pos = fadd(x_pos,fmul(averageDistance,sin(robotHeading)))
-    y_pos = fadd(y_pos,fmul(averageDistance,cos(robotHeading)))
-    if(PRINT_COORDS):
-        getCoords(PRINTING_DIGITS)
-'''
 def testForward(deltaTime):
     myro.motors(1,1)
     sleep(deltaTime)
