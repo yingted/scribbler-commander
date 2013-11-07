@@ -1,4 +1,4 @@
-import myro.robots.scribbler2
+'''import myro.robots.scribbler2
 _oldAdjustSpeed = myro.robots.scribbler2.Scribbler._adjustSpeed
 def _newAdjustSpeed(self):
     left = min(max(self._lastTranslate - self._lastRotate, -1), 1)
@@ -6,7 +6,7 @@ def _newAdjustSpeed(self):
     print "left", left, "right", right
     _oldAdjustSpeed(self)
 myro.robots.scribbler2.Scribbler._adjustSpeed = _newAdjustSpeed
-
+'''
 from math import *
 #import myro
 from time import sleep
@@ -26,6 +26,20 @@ x_pos = 0
 y_pos = 0
 robotHeading = 0
 positions = []
+
+def distTo(target_x,target_y):
+    distance = ((x_pos-target_x)**2+(y_pos-target_y)**2)**0.5
+    if(fabs(x_pos-target_x)<EPSILON):
+        targetHeading = pi/2
+        if((y_pos-target_y)>(-1*EPSILON)):
+            targetHeading = 3*pi/2
+    else:
+        targetHeading = atan((y_pos*1.0-target_y)/(x_pos-target_x))
+    if((x_pos-target_x)>EPSILON):
+        targetHeading -= pi
+    deltaHeading = pi/2-robotHeading-targetHeading
+    deltaHeading = (deltaHeading+pi)%(2*pi)-pi
+    return [distance,deltaHeading]
 
 #Robot headings are rotated clockwise = positive, counterclockwise = negative
 def deadReckoning(leftMotorConstant,rightMotorConstant,deltaTime):
