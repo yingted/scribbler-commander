@@ -22,6 +22,15 @@ def get_obstacle(emitters):
 		return(robots.scribbler.read_2byte(robot.ser)+2**15)%2**16-2**15
 	finally:
 		robot.lock.release()
+def get_encoders(zero=False):
+	"""returns encoder values, optionally resetting them"""
+	try:
+		robot.lock.acquire()
+		robot.ser.write(struct.pack('BB',171,zero))
+		#return robot.read_uint32(),robot.read_uint32()
+		return struct.unpack('<II',robot.ser.read(8))
+	finally:
+		robot.lock.release()
 def memoize(func):
 	cache={}
 	def wrapped(*args):
