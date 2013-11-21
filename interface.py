@@ -3,33 +3,8 @@ import cherrypy
 import os
 import myro
 import util
-import socket
 import sys
-_use_simulator = False
-connected = False
-
-if _use_simulator:
-	# connect to myro
-	try:
-		s=socket.socket()
-		s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-		# test if simulator is running
-		s.bind(("127.0.0.1", 60000))
-		s.close()
-	except socket.error, e:
-		# simulator is running, so wait and connect to it
-		robot = myro.globvars.robot = myro.robots.simulator.SimScribbler(None)
-	else:
-		# start a new simulator
-		myro.simulator()
-		connected = True
-	if not hasattr(robot, "robotinfo"): # prevent KeyError on KeyboardInterrupt
-		robot.robotinfo = {}
-else:
-	connected = False
-	util.xp_initialize()
-	connected = True
-
+util.connect_async()
 class ScribblerCommander(object):
 	@cherrypy.expose
 	def index(self, do=None):
