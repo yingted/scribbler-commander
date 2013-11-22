@@ -46,12 +46,26 @@
 							setTimeout(update,10000);
 						});
 				})();
-			});
-			$(function(){
 				$("form [type=submit]").click(function(e){
 					e.preventDefault();
 					$.post("/"+$(this).val());
 				});
+				var params="";
+				(function subscribe(){
+					$.ajax({
+						url:"/subscribe"+params,
+						type:"POST",
+						timeout:30000,
+						dataType:"json",
+					}).fail(function(){
+						setTimeout(subscribe,1000);
+					}).done(function(data){
+						params="?t="+data.t;
+						for(var a=data.deltas,i=0;i<a.length;++i)
+							console.log(a[i]);
+						subscribe();
+					});
+				})();
 			});
 		</script>
 	</body>
