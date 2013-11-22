@@ -17,17 +17,21 @@
 		<form method="post">
 			<img id="photo">
 			<fieldset>
-				<input type="submit" name="do" value="stop">
+				<legend>motor controls</legend>
+				<button type="submit" name="do" value="stop">stop</button>
 				<br>
-				<input type="submit" name="do" value="backward">
-				<input type="submit" name="do" value="forward">
+				<button type="submit" name="do" value="backward">backward</button>
+				<button type="submit" name="do" value="forward">forward</button>
 				<br>
-				<input type="submit" name="do" value="left">
-				<input type="submit" name="do" value="right">
-				<br>
-				<input type="submit" name="do" value="take a photo">
+				<button type="submit" name="do" value="left">left</button>
+				<button type="submit" name="do" value="right">right</button>
 			</fieldset>
 			<fieldset>
+				<legend>high-level controls</legend>
+				<button type="submit" name="do" value="photo">take a photo</button>
+			</fieldset>
+			<fieldset>
+				<legend>sensors</legend>
 				<label for="battery">battery</label>
 				<input id="battery">
 			</fieldset>
@@ -35,13 +39,19 @@
 		<script>
 			$(function(){
 				(function update(){
-					$.get("/battery")
+					$.post("/battery")
 						.done(function(data){
 							$("#battery").val(data);
 						}).always(function(){
 							setTimeout(update,10000);
 						});
 				})();
+			});
+			$(function(){
+				$("form input[type=submit]").click(function(e){
+					e.preventDefault();
+					$.post("/"+$(this).val());
+				});
 			});
 		</script>
 	</body>
