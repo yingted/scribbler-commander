@@ -5,6 +5,10 @@ except ImportError:
 import os
 import struct
 import socket
+import collections
+import shelve
+import time
+import atexit
 _use_simulator = True
 def simulator_started():
 	# connect to myro
@@ -12,41 +16,22 @@ def simulator_started():
 		s=socket.socket()
 		s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 		# test if simulator is running
-		s.bind(("127.0.0.1", 60000))
+		s.bind(('127.0.0.1', 60000))
 		s.close()
 		return False
 	except socket.error, e:
 		# simulator is running
 		return True
 def xp_initialize():
-	"""cross-platform initialization"""
+	'''cross-platform initialization'''
 	for dev in'/dev/rfcomm0','/dev/tty.scribbler':
 		if os.path.exists(dev):
 			initialize(dev)
 			break
 	else:
 		initialize('COM40')
-connected=False
-def connect_async(cb=None):
-	"""asynchronously connect to scribbler"""
-	global connected
-	if _use_simulator:
-		robot = None
-		if simulator_started():
-			robot = myro.globvars.robot = myro.robots.simulator.SimScribbler(None)
-		else:
-			# start a new simulator
-			myro.simulator()
-		if robot is not None and not hasattr(robot, "robotinfo"): # prevent KeyError on KeyboardInterrupt
-			robot.robotinfo = {}
-	else:
-		connected = False
-		xp_initialize()
-	connected = True
-	if cb is not None:
-		cb()
 def get_obstacle(emitters):
-	"""count IR bounces using emitters"""
+	'''count IR bounces using emitters'''
 	if isinstance(emitters,str):
 		emitters=1<<'lrc'.index(emitters[0])
 	try:
@@ -56,7 +41,7 @@ def get_obstacle(emitters):
 	finally:
 		robot.lock.release()
 def get_encoders(zero=False):
-	"""returns encoder values, optionally resetting them"""
+	'''returns encoder values, optionally resetting them'''
 	try:
 		robot.lock.acquire()
 		robot.ser.write(struct.pack('BB',171,zero))
@@ -65,10 +50,61 @@ def get_encoders(zero=False):
 	finally:
 		robot.lock.release()
 def memoize(func):
-	"""decorator to naively memoize function calls"""
+	'''decorator to naively memoize function calls'''
 	cache={}
 	def wrapped(*args):
 		if args not in cache:
 			cache[args] = func(*args)
 		return cache[args]
 	return wrapped
+class State(shelve.DbfilenameShelf):
+	'''persistent state
+	TODO allow loading only part of the state'''
+	def __init__(self, filename='data/log', flag='c', protocol=None, writeback=False):
+		shelve.DbfilenameShelf.__init__(self, filename, flag, protocol, writeback)
+		atexit.register(self.close)
+		self.handlers = []
+	def history(self, key):
+		'''returns the history of the values of the key
+		the return value should not be changed'''
+		return shelve.DbfilenameShelf.__getitem__(self, key)
+	def age(self, key):
+		'''returns how long ago the key was set'''
+		return time.time()-self.history(key)[-1][0]
+	def __getitem__(self, key):
+		'''returns the current value of the key'''
+		return self.history(key)[-1][1]
+	def watch(self, cb):
+		'''adds a callback for setitem'''
+		self.handlers.append(cb)
+	def __setitem__(self, key, val):
+		'''adds a new value to this history'''
+		l = []
+		if key in self:
+			l = self.history(key)
+		t = time.time()
+		l.append((t, val))
+		shelve.DbfilenameShelf.__setitem__(self, key, l)
+		for cb in self.handlers:
+			cb(t, key, val)
+		self.sync()
+state = State()
+
+state['connected'] = False
+def connect_async(cb=None):
+	'''asynchronously connect to scribbler'''
+	if _use_simulator:
+		robot = None
+		if simulator_started():
+			robot = myro.globvars.robot = myro.robots.simulator.SimScribbler(None)
+		else:
+			# start a new simulator
+			myro.simulator()
+		if robot is not None and not hasattr(robot, 'robotinfo'): # prevent KeyError on KeyboardInterrupt
+			robot.robotinfo = {}
+	else:
+		state['connected'] = False
+		xp_initialize()
+	state['connected'] = True
+	if cb is not None:
+		cb()
