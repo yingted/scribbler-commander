@@ -1,6 +1,6 @@
-shell: python root/lib/python2.4/site-packages/PIL.pth pyserial-2.2
+shell: python root/lib/python2.4/site-packages/PIL.pth pyserial-2.2 root/lib/python2.4/site-packages/numpy root/lib/python2.4/site-packages/scipy root/lib/python2.4/site-packages/simplejson
 	./python -ic 'import myro;from myro import *'
-python: root/lib/python2.4 myro root/lib/python2.4/site-packages/numpy root/lib/python2.4/site-packages/scipy
+python: root/lib/python2.4 myro
 	[ -h root/lib/python2.4/site-packages/myro ] || ln -s ../../../../myro root/lib/python2.4/site-packages
 	[ -h root/lib/python2.4/site-packages/serial ] || ln -s ../../../../pyserial-2.2/serial root/lib/python2.4/site-packages
 	> python echo \#!/bin/sh
@@ -43,5 +43,9 @@ root/lib/python2.4/site-packages/scipy: scipy-0.11.0
 matplotlib-1.1.0:
 	wget 'http://downloads.sourceforge.net/project/matplotlib/matplotlib/matplotlib-1.1.0/matplotlib-1.1.0.tar.gz' -O- | tar xz
 root/lib/python2.4/site-packages/matplotlib: matplotlib-1.1.0
+	cd $< && ../python setup.py install
+simplejson-2.6.2:
+	curl https://pypi.python.org/packages/source/s/simplejson/simplejson-2.1.6.tar.gz | tar xz
+root/lib/python2.4/site-packages/simplejson: simplejson-2.1.6
 	cd $< && ../python setup.py install
 .PHONY: shell python
