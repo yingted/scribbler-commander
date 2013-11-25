@@ -25,9 +25,9 @@ edge cases best handled before the neighbors are even created
 XXX another place the sensors can come in
 """
 def neighbors(x,y=None):
-	if isinstance(x,tuple): x,y = x[0], x[1]
-	yield (x+1, y)
-	yield (x-1, y)
+  if isinstance(x,tuple): x,y = x[0], x[1]
+  yield (x+1, y)
+  yield (x-1, y)
 	yield (x, y+1)
 	yield (x, y-1)
 
@@ -88,7 +88,7 @@ def astar():
 					heappush(openset, (tentative_f,i))
 	 
 	 
-	pass #FAIL
+  pass #FAIL
 
 """
 
@@ -100,7 +100,7 @@ def trace_path(src, dest):
 		#print cur
 		path.append(cur)
 		cur = camefrom[cur]
-	return reversed(path)
+  return reversed(path)
 
 def findloops(graph):
 	for i in graph.keys():
