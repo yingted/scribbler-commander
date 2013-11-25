@@ -1,6 +1,5 @@
-import deadreckoning
 from pickle import load
-from numpy import arange, pi, exp, log, linspace, around, ndarray, array, ones
+from numpy import arange, pi, exp, log, tan, arctan, linspace, around, ndarray, array, ones
 from scipy.integrate import quad
 from util import memoize, xp_initialize, get_obstacle
 from itertools import cycle, islice
@@ -14,6 +13,11 @@ class Prior(object):
 	_r_to_t = _max_t / _max_r
 	_sigma_theta = pi / 12 #TODO measure
 	_max_v = 6400 #for opcode 157 with latency 400
+	_N = 17
+	_h = .15
+	_points = tan(linspace(0, arctan(_max_r / _h), num=_N+1)) * _h
+	_widths = map(float.__sub__, _points[1:], _points[:-1])
+	_times = _points / _max_r * _max_t
 	def __init__(self, inp='prior.pickle'):
 		if isinstance(inp, file):
 			self.data = load(inp)
@@ -29,11 +33,11 @@ class Prior(object):
 			for k in self.data[irp]:
 				self.data[irp][k] = array(self.data[irp][k])
 	def v_r(self, irp, v, r):
-		"""log of conditional distribution P(v|irp,r)"""
+		'''log of conditional distribution P(v|irp,r)'''
 		t = r * self._r_to_t
 		data = self.data[irp]
 
-		i = _floor_clip(t, 0, self._max_t - 1)
+		i = min(self._N - 1, searchsorted(self._times, t, side='right'))
 		dt = t - i
 		mu1 = data['mu'][i]
 		mu2 = data['mu'][i+1]
@@ -45,21 +49,43 @@ class Prior(object):
 		return ((v - mu)/sigma)**2 / -2 - log((2 * pi)**.5 * sigma)
 	@memoize #XXX check memory usage
 	def r(self, irp, r):
-		"""log of distribution P(r)"""
+		'''log of distribution P(r)'''
 		return log(exp(self.v_r(irp, arange(0, self._max_v + 1), r)).sum())
 	@memoize
 	def v(self, irp, v):
-		"""log of distribution P(v)"""
+		'''log of distribution P(v)'''
 		return log(quad(lambda r: exp(self.v_r(irp, v, r) - self.r(irp, r)), 0, self._max_r)[0])
 	def __call__(self, irp, v, r):
-		"""log P"""
+		'''log P'''
 		return self.v_r(irp, v, r) + self.r(irp, r)
+class Map(object):
+	def __init__(self, P, w, h):
+		self.P = P
+		self.w = w
+		self.h = h
+		rho = .15
+		self.log_rho = log(rho)
+		lambd = .6
+		d = ones((w, h)) * log_rho
+		self.R = tan(linspace(0, arctan(P._max_r / .08), num=18))
+		self.R /= self.R.max()
+		self.R *= P._max_r
+	def update(self, x, y, irp, v):
+		d = (d - self.log_rho) * self.lambd + self.log_rho
+		H = P.v(irp, v)
+		E = array([P(irp, v, r) for r in self.R])
+		d += E - H
+		#print v, d
+		Z = exp(d).sum()
+		if Z!=0:
+			p = exp(d) / Z
 if __name__=='__main__':
 	from myro import *
 	from numpy import array, set_printoptions, dot
 	from matplotlib.pyplot import *
 	from movement import moveforward, turnside
 	from time import time
+	import deadreckoning
 	P=Prior()
 	#R = linspace(0, P._max_r, num=300)
 	R = linspace(0, P._max_r, num=100)
@@ -119,7 +145,7 @@ if __name__=='__main__':
 		#raw_input('press enter to continue: ')
 	left_seconds = [0]
 	def rotation(left): # assume only one value
-		"""contract: this generator must complete"""
+		'''contract: this generator must complete'''
 		left_seconds[0] -= time() * cmp(left, 0)
 		motors(left, -left)
 		yield None

@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 """generates prior from data"""
-N=50
 if __name__=="__main__":
 	from pickle import load,dump
 	from sys import argv
 	from numpy import *
 	from scipy.stats import linregress
+	from model import Prior
 	data={}
 	with open(argv[1])as f:
 		for ent in load(f):
@@ -17,27 +17,31 @@ if __name__=="__main__":
 				v.append(sample['v'])
 			t=array(t)
 			v=array(v)
-			weight=zeros(N+1)
+			errors=zeros(Prior._N+1)
+			counts=zeros(Prior._N+1)
 			vals=[]
-			dx=1
-			for start in xrange(0,N,dx):
-				i=(start<=t)&(t<start+dx)
+			for j,(start,end)in enumerate(zip(Prior._times,Prior._times[1:])):
+				i=(start<=t)&(t<end)
+				count=i.sum()
 				m_t,b_t,_,_,sigma_t=linregress(arange(len(t))[i],t[i])
-				m_v,b_v,_,_,sigma_v=linregress(t[i],v[i])
-				var_t=(sigma_t*m_v)**2+1e-1
+				m_v,b_v,r,_,sigma_v=linregress(t[i],v[i])
+				sigma_t=std(t[i]-(b_t+m_t*arange(len(t))[i]))#XXX do not recompute
+				sigma_v=std(v[i]-(b_v+m_v*t[i]))#XXX do not recompute
+				var_t=(sigma_t*m_v)**2*(1-r**2)#basically 0
 				var_v=sigma_v**2+1e-1
-				w=1/(var_t+var_v)
-				vals.append((m_v*start+b_v,m_v*(start+1)+b_v,w))
-				weight[start]+=w
-				weight[start+1]+=w
-			i=arange(N+1)
-			sigma=weight**-.5
+				var=(var_t+var_v)*count
+				vals.append((m_v*start+b_v,m_v*end+b_v,count))
+				errors[j]+=.5*var
+				errors[j+1]+=.5*var
+				counts[j]+=.5*count
+				counts[j+1]+=.5*count
+			sigma=(errors/counts)**.5
 
-			mu=zeros(N+1)
+			mu=zeros(Prior._N+1)
 			for i,(left,right,w)in enumerate(vals):
-				mu[dx*i]+=left*w
-				mu[dx*(i+1)]+=right*w
-			mu/=weight
+				mu[i]+=.5*left*w
+				mu[i+1]+=.5*right*w
+			mu/=counts
 			data[ent['irp']]={
 				'mu':map(float,mu),
 				'sigma':map(float,sigma),
