@@ -40,7 +40,7 @@ class Subscription(object):
 				deltas_change.wait(1)
 			finally:
 				deltas_change.release()
-			return"<script>console.log('loading')</script>"
+			return'<script>console.log("loading")</script>'
 class ScribblerCommander(object):
 	@cherrypy.expose
 	def index(self, do=None):
@@ -74,7 +74,7 @@ class ScribblerCommander(object):
 			raise cherrypy.HTTPError(503, 'Service Unavailable')
 	@ajax
 	def subscribe(self, t=None):
-		"""subscribe to events"""
+		'''subscribe to events'''
 		if t is None:
 			cherrypy.response.headers['Content-Type'] = 'application/javascript'
 			i = len(deltas)
