@@ -1,6 +1,7 @@
 from pickle import load
 from numpy import arange, pi, exp, log, tan, arctan, linspace, around, ndarray, array, ones
 from scipy.integrate import quad
+from scipy.interpolate import UnivariateSpline
 from util import memoize, xp_initialize, get_obstacle
 from itertools import cycle, islice
 def _floor_clip(v, lo, hi):
@@ -12,6 +13,7 @@ class Prior(object):
 	_max_t = 50
 	_r_to_t = _max_t / _max_r
 	_sigma_theta = pi / 12 #TODO measure
+	_var_theta = _sigma_theta**2
 	_max_v = 6400 #for opcode 157 with latency 400
 	_N = 17
 	_h = .15
@@ -58,23 +60,35 @@ class Prior(object):
 	def __call__(self, irp, v, r):
 		'''log P'''
 		return self.v_r(irp, v, r) + self.r(irp, r)
+	def theta(self, theta):
+		'''log of distribution P(theta) in radians'''
+		return -(theta**2/P._var_theta-log(2*pi*P._var_theta))/2
 class Map(object):
 	def __init__(self, P, w, h):
+		'''construct a grid map'''
 		self.P = P
 		self.w = w
 		self.h = h
+		self.x, self.y = mgrid[0:w, 0:h]
 		rho = .15
 		self.log_rho = log(rho)
 		lambd = .6
 		d = ones((w, h)) * log_rho
-		self.R = tan(linspace(0, arctan(P._max_r / .08), num=18))
-		self.R /= self.R.max()
-		self.R *= P._max_r
-	def update(self, x, y, irp, v):
+		self.R = tan(linspace(0, arctan(P._max_r / P._h), num=3 * P._N+1)) * P._h
+	def update(self, x0, y0, theta0, irp, v):
+		'''update the map using sensor data
+		x0, y0, theta0 are standard mathematics x, y, theta'''
 		d = (d - self.log_rho) * self.lambd + self.log_rho
 		H = P.v(irp, v)
-		E = array([P(irp, v, r) for r in self.R])
-		d += E - H
+		# use P_r(r) as a cached for P(irp, v, r) 
+		P_r = UnivariateSpline(self.R, array([P(irp, v, r) for r in self.R]))
+		# calculate radii, set of radii and thetas
+		x = self.x - x0
+		y = self.y - y0
+		radii = hypot(x, y)
+		thetas = arctan2(y, x) - theta0
+		E = P_r(radii)
+		d += exp(P.theta(thetas)) * (E - H)
 		#print v, d
 		Z = exp(d).sum()
 		if Z!=0:
