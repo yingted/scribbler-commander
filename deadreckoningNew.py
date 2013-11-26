@@ -47,3 +47,12 @@ def update():
 
 def getCoords(numberOfDigits=DEFAULT_DIGITS):
     print "(" + str(round(x_pos*0.001,numberOfDigits)) + "," + str(round(y_pos*0.001,numberOfDigits)) + " at angle "+str(round(robotHeading,numberOfDigits))+")"
+
+def getX():
+    return x_pos
+
+def getY():
+    return y_pos
+
+def getHeading():
+    return robotHeading
