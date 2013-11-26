@@ -1,4 +1,4 @@
-#!usr/bin/env python
+#!/usr/bin/env python
 #XXX ^ must change to fit environment
 import numpy
 from math import hypot
