@@ -10,6 +10,7 @@ import threading
 import simplejson as json
 import bisect
 import numpy
+import datetime
 util.connect_async()
 def ajax(handler):
 	return cherrypy.expose(cherrypy.tools.allow(methods=('POST',))(cherrypy.tools.json_out()(handler)))
@@ -71,6 +72,21 @@ class ScribblerCommander(object):
 			return myro.getBattery()/9.
 		except AttributeError:
 			raise cherrypy.HTTPError(503, 'Service Unavailable')
+	@ajax
+	def photo(self):
+		try:
+			deltas_change.acquire()
+			if util.state.age('photo') > self.photo_delay:
+				filename = datetime.datetime.now().isoformat()
+				fd = open(filename, 'w')
+				try:
+					util.grab_jpeg_color(fd, 1)
+				finally:
+					fd.close()
+				util.state['photo'] = filename
+			return util.state['photo']
+		finally:
+			deltas_change.release()
 	@ajax
 	def subscribe(self, t=None):
 		'''subscribe to events'''
