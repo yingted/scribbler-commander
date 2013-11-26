@@ -7,15 +7,15 @@
 		<style>
 			#photo{
 				float:right;
-				width:100px;
-				height:100px;
+				width:256px;
+				height:192px;
 				border:1px solid black;
 			}
 		</style>
 	</head>
 	<body>
 		<form method="post">
-			<img id="photo">
+			<a id="photo-link" target="_blank"><img id="photo" alt="no image"></a>
 			<fieldset>
 				<legend>motor controls</legend>
 				<button type="submit" name="do" value="stop">stop</button>
@@ -28,7 +28,7 @@
 			</fieldset>
 			<fieldset>
 				<legend>high-level controls</legend>
-				<button type="submit" name="do" value="photo">take a photo</button>
+				<button type="submit" name="go" value="photo">take a photo</button>
 			</fieldset>
 			<fieldset>
 				<legend>sensors</legend>
@@ -46,9 +46,17 @@
 							setTimeout(update,10000);
 						});
 				})();
-				$("form [type=submit]").click(function(e){
+				$("form [name=do]").click(function(e){
 					e.preventDefault();
 					$.post("/"+$(this).val());
+				});
+				$("form [name=go]").click(function(e){
+					e.preventDefault();
+					$.post("/"+$(this).val())
+						.done(function(data){
+							$("#photo").attr("alt",data).attr("src",data);
+							$("#photo-link").attr("href",data);
+						});
 				});
 				var params="";
 				(function subscribe(){
