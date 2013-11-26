@@ -83,17 +83,18 @@ class ScribblerCommander(object):
 					util.grab_jpeg_color(fd, 1)
 				finally:
 					fd.close()
-				util.state['photo'] = filename
+				util.state['photo'] = {
+					'path': filename,
+				}
 			return util.state['photo']
 		finally:
 			deltas_change.release()
 	@ajax
 	def subscribe(self, t=None):
-		'''subscribe to events'''
+		'''subscribe to events after t'''
 		if t is None:
-			cherrypy.response.headers['Content-Type'] = 'application/javascript'
 			i = len(deltas)
-			cur = dict((key,util.state.history(key)[-1]) for key in util.state)
+			cur = dict((key, util.state.history(key)[-1]) for key in util.state)
 			j = len(deltas)
 			prefix = []
 			#hide race conditions
@@ -110,7 +111,7 @@ class ScribblerCommander(object):
 		t = float(t)
 		while True:#completely different logic
 			if deltas and deltas[-1][0] > t:
-				i = bisect.bisect_left(deltas,(numpy.nextafter(t,t+1),))
+				i = bisect.bisect_left(deltas, (numpy.nextafter(t, t+1),))
 				j = len(deltas)
 				return {'t':deltas[j-1][0], 'deltas':deltas[i:j]}
 			try:
@@ -119,6 +120,10 @@ class ScribblerCommander(object):
 			finally:
 				deltas_change.release()
 			return {'t':t, 'deltas':[]}
+	@ajax
+	def history(self, key, t=None):
+		'''return history before t'''
+		return [elt for elt in util.state.history(key) if elt[2] < t]
 if __name__=="__main__":
 	current_dir = os.path.dirname(os.path.abspath(__file__))
 	config = {

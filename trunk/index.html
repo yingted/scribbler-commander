@@ -54,8 +54,8 @@
 					e.preventDefault();
 					$.post("/"+$(this).val())
 						.done(function(data){
-							$("#photo").attr("alt",data).attr("src",data);
-							$("#photo-link").attr("href",data);
+							$("#photo").attr("alt",data.path).attr("src",data.path);
+							$("#photo-link").attr("href",data.path);
 						});
 				});
 				$(document)
@@ -73,6 +73,12 @@
 					}).fail(function(){
 						setTimeout(subscribe,1000);
 					}).done(function(data){
+						if(!params){//first one; we're done loading the main ui
+							$.ajax("/history?key=photo&t="+data.t)
+								.done(function(photos){
+									console.log(photos);
+								});
+						}
 						params="?t="+data.t;
 						for(var a=data.deltas,i=0;i<a.length;++i){
 							console.log("%o: %o at %o",a[i][0],a[i][1],a[i][2]);
