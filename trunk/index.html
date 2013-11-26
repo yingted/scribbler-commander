@@ -70,13 +70,30 @@
 						type:"POST",
 						timeout:30000,
 						dataType:"json",
-					}).fail(function(){
-						setTimeout(subscribe,1000);
+					}).fail(function(e){
+						if(e.status!=0){
+							setTimeout(subscribe,1000);
+							return;
+						}
+						$(document).trigger("connected",false);
+						(function reconnect(){
+							$.ajax({
+								url:"/subscribe",
+								type:"POST",
+								timeout:10000,//should be immediate
+								dataType:"json",
+							}).success(function(){
+								$(document).trigger("connected",true);
+								subscribe();
+							}).fail(function(){
+								setTimeout(reconnect,1000);
+							});
+						})();
 					}).done(function(data){
 						if(!params){//first one; we're done loading the main ui
-							$.ajax("/history?key=photo&t="+data.t)
+							$.post("/history?key=photo&t="+data.t)
 								.done(function(photos){
-									console.log(photos);
+									console.log("photos",photos);
 								});
 						}
 						params="?t="+data.t;

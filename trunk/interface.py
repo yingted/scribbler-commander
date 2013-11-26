@@ -123,7 +123,9 @@ class ScribblerCommander(object):
 	@ajax
 	def history(self, key, t=None):
 		'''return history before t'''
-		return [elt for elt in util.state.history(key) if elt[2] < t]
+		if key in util.state:
+			return [elt for elt in util.state.history(key) if elt[2] < t]
+		return []
 if __name__=="__main__":
 	current_dir = os.path.dirname(os.path.abspath(__file__))
 	config = {
