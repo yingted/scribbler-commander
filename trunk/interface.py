@@ -112,6 +112,10 @@ cherrypy.quickstart(ScribblerCommander(),config={
 		'tools.staticfile.on' : True,
 		'tools.staticfile.filename' : 'index.html',
 		'tools.staticfile.match' : '^/$', # only match the exact url /
+		'tools.auth_digest.on': False,
+		'tools.auth_digest.realm': 'scribbler-commander',
+		'tools.auth_digest.get_ha1': cherrypy.lib.auth_digest.get_ha1_file_htdigest('htdigest'),
+		'tools.auth_digest.key': 'f5d935a764a2d627',
 	},
 	'/static' : {
 		'tools.staticdir.on' : True,
