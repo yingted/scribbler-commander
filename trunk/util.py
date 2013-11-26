@@ -49,6 +49,26 @@ def get_encoders(zero=False):
 		return struct.unpack('<II',robot.ser.read(8))
 	finally:
 		robot.lock.release()
+def read_jpeg_scan(out):
+	while True:
+		ch = robot.ser.read(1)
+		out(ch)
+		if ch == '\xff':
+			while ch == '\xff':
+				ch = robot.ser.read(1)
+				out(ch)
+			if ch in '\x00\x01\xd0\xd1\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9':
+				if ch == '\xd9':
+					break
+				hi, lo = robot.ser.read(2)
+				out(hi + lo)
+				out(robot.ser.read((hi << 8) | lo))
+	bm0 = robot.read_uint32()# Start
+	bm1 = robot.read_uint32()# Read
+	bm2 = robot.read_uint32()# Compress
+	if robot.debug:
+		freq = 60e6
+		print 'got image\n%.3f %.3f' % (((bm1 - bm0) / freq), ((bm2 - bm1) / freq))
 def memoize(func):
 	'''decorator to naively memoize function calls'''
 	cache={}
