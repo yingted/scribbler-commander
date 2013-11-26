@@ -1,0 +1,5 @@
+#summary Default login is admin:admin
+
+= Introduction =
+
+The authentication is http digest. It protects the controls.
