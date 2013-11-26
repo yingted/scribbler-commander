@@ -69,16 +69,16 @@ class ScribblerCommander(object):
 	@ajax
 	def battery(self):
 		try:
-			return myro.getBattery()/9.
+			return myro.getBattery() / 9.
 		except AttributeError:
 			raise cherrypy.HTTPError(503, 'Service Unavailable')
-	@ajax
+	@ajax#XXX handle non-ajax
 	def photo(self):
 		try:
 			deltas_change.acquire()
 			if util.state.age('photo') > self.photo_delay:
-				filename = datetime.datetime.now().isoformat()
-				fd = open(filename, 'w')
+				filename = 'photos/%s.jpg' % datetime.datetime.now().isoformat()
+				fd = open(photo_filename(filename), 'w')
 				try:
 					util.grab_jpeg_color(fd, 1)
 				finally:
@@ -119,22 +119,31 @@ class ScribblerCommander(object):
 			finally:
 				deltas_change.release()
 			return {'t':t, 'deltas':[]}
-
-current_dir = os.path.dirname(os.path.abspath(__file__))
-cherrypy.quickstart(ScribblerCommander(),config={
-	'/' : {
-		'tools.staticdir.root' : current_dir,
-		'tools.staticfile.root' : current_dir,
-		'tools.staticfile.on' : True,
-		'tools.staticfile.filename' : 'index.html',
-		'tools.staticfile.match' : '^/$', # only match the exact url /
+if __name__=="__main__":
+	current_dir = os.path.dirname(os.path.abspath(__file__))
+	config = {
+		'/' : {
+			'tools.staticdir.root' : current_dir,
+			'tools.staticfile.root' : current_dir,
+			'tools.staticfile.on' : True,
+			'tools.staticfile.filename' : 'index.html',
+			'tools.staticfile.match' : '^/$', # only match the exact url /
+		},
+		'/static' : {
+			'tools.staticdir.on' : True,
+			'tools.staticdir.dir' : 'static',
+		},
+		'/photos' : {
+			'tools.staticdir.on' : True,
+			'tools.staticdir.dir' : 'photos',
+		},
+	}
+	auth = {
 		'tools.auth_digest.on': False,
 		'tools.auth_digest.realm': 'scribbler-commander',
 		'tools.auth_digest.get_ha1': cherrypy.lib.auth_digest.get_ha1_file_htdigest('htdigest'),
 		'tools.auth_digest.key': 'f5d935a764a2d627',
-	},
-	'/static' : {
-		'tools.staticdir.on' : True,
-		'tools.staticdir.dir' : 'static',
-	},
-})
+	}
+	config['/'].update(auth)
+	config['/photos'].update(auth)
+	cherrypy.quickstart(ScribblerCommander(), config=config)

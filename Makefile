@@ -1,8 +1,10 @@
 PYTHON=lib/python
-run: data htdigest lib/python static/js/jquery-1.10.2.min.js kill
+run: data photos htdigest lib/python static/js/jquery-1.10.2.min.js kill
 	trap 'make kill' EXIT; lib/python interface.py
 data:
 	mkdir data
+photos:
+	mkdir photos
 demo: 
 	$(PYTHON) model.py
 kill:
