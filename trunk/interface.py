@@ -37,10 +37,9 @@ class Subscription(object):
 				return elt_to_js(deltas[self.i-1])
 			try:
 				deltas_change.acquire()
-				deltas_change.wait(1)
+				deltas_change.wait()
 			finally:
 				deltas_change.release()
-			return'<script>console.log("loading")</script>'
 class ScribblerCommander(object):
 	@cherrypy.expose
 	def index(self, do=None):
