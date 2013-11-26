@@ -49,9 +49,15 @@ def get_encoders(zero=False):
 		return struct.unpack('<II',robot.ser.read(8))
 	finally:
 		robot.lock.release()
-def read_jpeg_scan(out):
+def grab_jpeg_color(out, reliable):
+	'''reads a jpeg scan to a file.write function'''
 	try:
 		robot.lock.acquire()
+		if robot.color_header == None:
+			robot.ser.write(chr(robot.GET_JPEG_COLOR_HEADER))
+			robot.color_header = robot.read_jpeg_header()
+		robot.ser.write(chr(robot.GET_JPEG_COLOR_SCAN) + chr(reliable))
+		out(robot.color_header)
 		while True:
 			ch = robot.ser.read(1)
 			out(ch)
