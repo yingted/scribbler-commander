@@ -30,7 +30,7 @@
 			}
 
 			#battery{
-				height:1.5em;
+				height:1.3em;
 				width:200px;
 				background-color:#777;
 				margin:0 auto;
@@ -50,6 +50,8 @@
 				right:0;
 				bottom:0;
 				top:0;
+				color:white;
+				font-weight:bold;
 			}
 			fieldset{
 				position:relative;
@@ -91,6 +93,9 @@
 			}
 			#search:hover{
 				background-color: #3F3;
+			}
+			#templates{
+				display:none;
 			}
 			
 		</style>
@@ -141,6 +146,11 @@
 		</div>
 		<div id="photos">
 			<ul id="photo-list"></ul>
+		</div><!--"-->
+		<div id="templates">
+			<li class="photo-item">
+				<img width="160" height="128">
+			</li>
 		</div>
 		<script>
 			$(function(){
@@ -216,7 +226,7 @@
 					
 					
 				}
-				setInterval(function(){updateMap(null,null,null,null)},33);
+				//setInterval(function(){updateMap(null,null,null,null)},33);
 				(function update(){
 					$.post("/battery")
 						.done(function(battery){
@@ -245,8 +255,8 @@
 						$("input").prop("disabled",!connected);
 						if(!connected)
 							$("battery-level").text("not connected");
-					}).trigger("connected",false).on("photo",function(photo){
-						console.log("photo",photo);
+					}).trigger("connected",false).on("photo",function(e,photo){
+						$("#templates>.photo-item").clone().prependTo("#photo-list").find("img").attr("src",photo.path);
 					});
 				var params="";
 				(function subscribe(){
@@ -278,7 +288,11 @@
 						if(!params){//first one; we're done loading the main ui
 							$.post("/history?key=photo&t="+data.t)
 								.done(function(photos){
-									console.log("photos",photos);
+									$(photos.reverse()).map(function(i,e){
+										var $elt=$("#templates>.photo-item").clone();
+										$elt.find("img").attr("src",e[1].path);
+										return $elt[0];
+									}).appendTo("#photo-list");
 								});
 						}
 						params="?t="+data.t;
