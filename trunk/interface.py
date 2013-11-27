@@ -11,6 +11,7 @@ import simplejson as json
 import bisect
 import numpy
 import datetime
+import deadreckoningNew as deadreckoning
 util.connect_async()
 def ajax(handler):
 	return cherrypy.expose(cherrypy.tools.allow(methods=('POST',))(cherrypy.tools.json_out()(handler)))
@@ -86,6 +87,9 @@ class ScribblerCommander(object):
 					fd.close()
 				util.state['photo'] = {
 					'path': filename,
+					'x': deadreckoning.getX(),
+					'y': deadreckoning.getY(),
+					'theta': deadreckoning.getHeading(),
 				}
 			return util.state['photo']
 		finally:
