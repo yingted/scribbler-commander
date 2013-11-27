@@ -17,6 +17,8 @@ previousTime = time.time()
 
 #resets coordinates
 def reset_deadReckoning():
+    '''resets dead reckoning
+    motors must be stopped'''
     global x_pos, y_pos, robotHeading, moveHistory, previousTime
     x_pos = 0.0
     y_pos = 0.0
@@ -50,8 +52,9 @@ def update():
     encoders = get_encoders(False)#gets number of encoder counts and reset it to 0
     distanceLeft = float(encoders[0])*DISTANCE_PER_COUNT/2.0#gets distance travelled by left wheel
     distanceRight = float(encoders[1])*DISTANCE_PER_COUNT/2.0#gets distance travelled by right wheel
-    moveHistory.append([distanceLeft,distanceRight,time.time()-previousTime])
-    #istate['wheel_speed']=distanceLeft/(time.time()-previousTime),distanceRight/(time.time()-previousTime)
+    delta_t=time.time()-previousTime
+    moveHistory.append([distanceLeft,distanceRight,delta_t])
+    state['wheel_speed']=distanceLeft/delta_t,distanceRight/delta_t
     cosCurrentAngle = math.cos(robotHeading)#cosine of current angle
     sinCurrentAngle = math.sin(robotHeading)#sine of current angle
     if(encoders[0]==encoders[1]):#if the distances are equal (robot is going straight)
@@ -63,6 +66,7 @@ def update():
         x_pos += distRatio * (math.cos(distDiff/ROBOT_DIAMETER+robotHeading)-cosCurrentAngle)#updates global coordinate x
         y_pos += distRatio * (math.sin(distDiff/ROBOT_DIAMETER+robotHeading)-sinCurrentAngle)#updates global coordinate y
         robotHeading += distDiff/ROBOT_DIAMETER#updates current robot heading
+    state['where']=getX(),getY(),getHeading()
 
 def stopThread():
     global runThread
