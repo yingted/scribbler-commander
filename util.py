@@ -9,7 +9,7 @@ import collections
 import shelve
 import time
 import atexit
-_use_simulator = True
+_use_simulator = False
 def simulator_started():
 	# connect to myro
 	try:
@@ -51,6 +51,7 @@ def get_encoders(zero=False):
 		robot.lock.release()
 def grab_jpeg_color(out, reliable):
 	'''reads a jpeg scan to a file.write function'''
+	start=time.time()
 	try:
 		robot.lock.acquire()
 		if robot.color_header == None:
@@ -68,9 +69,10 @@ def grab_jpeg_color(out, reliable):
 				if ch in '\x00\x01\xd0\xd1\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9':
 					if ch == '\xd9':
 						break
-					hi, lo = robot.ser.read(2)
-					out(hi + lo)
-					out(robot.ser.read((hi << 8) | lo))
+					continue
+				hi, lo = robot.ser.read(2)
+				out(hi + lo)
+				out(robot.ser.read((ord(hi) << 8) | ord(lo)))
 		bm0 = robot.read_uint32()# Start
 		bm1 = robot.read_uint32()# Read
 		bm2 = robot.read_uint32()# Compress
@@ -79,6 +81,7 @@ def grab_jpeg_color(out, reliable):
 			print 'got image\n%.3f %.3f' % (((bm1 - bm0) / freq), ((bm2 - bm1) / freq))
 	finally:
 		robot.lock.release()
+	print time.time()-start
 def memoize(func):
 	'''decorator to naively memoize function calls'''
 	cache={}
@@ -100,7 +103,10 @@ class State(shelve.DbfilenameShelf):
 		return shelve.DbfilenameShelf.__getitem__(self, key)
 	def age(self, key):
 		'''returns how long ago the key was set'''
-		return time.time()-self.history(key)[-1][0]
+		try:
+			return time.time()-self.history(key)[-1][0]
+		except KeyError:
+			return float('inf')
 	def __getitem__(self, key):
 		'''returns the current value of the key'''
 		return self.history(key)[-1][1]

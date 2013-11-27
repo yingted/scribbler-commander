@@ -79,9 +79,9 @@ class ScribblerCommander(object):
 			deltas_change.acquire()
 			if util.state.age('photo') > self.photo_delay:
 				filename = 'photos/%s.jpg' % datetime.datetime.now().isoformat()
-				fd = open(photo_filename(filename), 'w')
+				fd = open(filename, 'w')
 				try:
-					util.grab_jpeg_color(fd, 1)
+					util.grab_jpeg_color(fd.write, 1)
 				finally:
 					fd.close()
 				util.state['photo'] = {
