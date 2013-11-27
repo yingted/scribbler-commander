@@ -46,7 +46,7 @@ class Subscription(object):
 class ScribblerCommander(object):
 	#photo_delay = 1.#s
 	@cherrypy.expose
-	def index(self, do=None):
+	def index(self, do):
 		# check if action is safe
 		if hasattr(self, do):
 			handler = getattr(self, do)
