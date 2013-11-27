@@ -5,9 +5,9 @@ from heapq import *
 import threading # might not be necessary if thread not started here
 #import util # needed for state object
 from time import sleep
-from model import Map
+from model import Map,Prior
 
-obstaclemap = Map(None, 40, 40) # XXX dimensions and initial P (currently grid points every 10 cm)
+obstaclemap = Map(Prior(), 40, 40) # XXX dimensions and initial P (currently grid points every 10 cm)
 
 def set_target(xy):
     '''sets the target to x, y
@@ -23,16 +23,6 @@ def set_target(xy):
 #   that stuff still needs integration, currently each function is a 
 #   dummy for a blank, infinitely large 8-connected square grid
 #
-runThread = False
-def i():
-    global runThread
-    runThread = True
-    pFThread = threading.Thread(target=pathfinderThread)
-    pFThread.start()
-
-def stopThread():
-    global runThread
-    runThread = False
 
 """
 newtarget is None when there is no A* to do, 
@@ -46,11 +36,9 @@ start = (0,0) # XXX Must get from state
 finish = (10,10) # XXX Must get from state
 
 # XXX all of these should probably be stored in state
-openset = [(cost(start, finish), start)]
 closedset = set([])
 camefrom = {}
 g_score = {start:0} # best known cost from start
-f_score = {start:cost(start,finish)} # estimated total cost to target
 
 def resetAstar(new_start, new_finish):
     """
@@ -69,31 +57,6 @@ def resetAstar(new_start, new_finish):
     f_score = {start:cost(start,finish)} # estimated total cost to target
     return astar().next # returns generator's next function
 
-# XXX global pathpoints for debugging
-pathpoints = []
-
-iterastar = None
-def pathfinderThread():
-    """The thread that continually waits on target change and 
-    runs A* whenever a new target is set"""
-    global iterastar, pathpoints
-    while runThread:
-        # stuff happens
-        if newtarget != finish:
-            start = (0,0) #util.state["where"][0], util.state["where"][1]
-            # we currently scrap partial paths, which might be useful, 
-            # but that's okay.
-            iterastar = resetAstar(start,newtarget)
-        if newtarget != None and iterastar != None:
-            try:
-                # step once thru A*
-                iterastar()
-            except StopIteration:
-                # A* finished, so we update state
-                pathpoints = trace_path(start, finish)
-                newtarget = None
-        else:
-            sleep(50)
 
 def cost((x1,y1),(x2,y2)): 
     """
@@ -109,6 +72,33 @@ def cost((x1,y1),(x2,y2)):
 #   gonna get ugly -- 
 #   scales equivalent distance up with probability of obstacle at target
 #   not quite it, will figure tomorrow :D
+
+openset = [(cost(start, finish), start)]
+f_score = {start:cost(start,finish)} # estimated total cost to target
+
+
+# XXX global pathpoints for debugging
+pathpoints = []
+iterastar = None
+@util.every(50)
+def pathfinderThread():
+    """The thread that continually waits on target change and 
+    runs A* whenever a new target is set"""
+    global iterastar, pathpoints
+    # stuff happens
+    if newtarget != finish:
+        start = (0,0) #util.state["where"][0], util.state["where"][1]
+        # we currently scrap partial paths, which might be useful, 
+        # but that's okay.
+        iterastar = resetAstar(start,newtarget)
+    if newtarget != None and iterastar != None:
+        try:
+            # step once thru A*
+            iterastar()
+        except StopIteration:
+            # A* finished, so we update state
+            pathpoints = trace_path(start, finish)
+            newtarget = None
 
 
 def neighbors(x,y=None):
