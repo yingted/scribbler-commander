@@ -73,13 +73,13 @@ class Map(object):
 		rho = .15
 		self.log_rho = log(rho)
 		lambd = .6
-		d = ones((w, h)) * log_rho
+		self.d = ones((w, h)) * log_rho#log-probabilities
 		self.R = tan(linspace(0, arctan(P._max_r / P._h), num=3 * P._N+1)) * P._h
 	def update(self, x0, y0, theta0, irp, v):
 		'''update the map using sensor data
 		x0, y0, theta0 are standard mathematics x, y, theta
 		returns probabilities at self.x and self.y or None on failure'''
-		d = (d - self.log_rho) * self.lambd + self.log_rho
+		self.d = (self.d - self.log_rho) * self.lambd + self.log_rho
 		H = P.v(irp, v)
 		# use P_r(r) as a cached for P(irp, v, r) 
 		P_r = UnivariateSpline(self.R, array([P(irp, v, r) for r in self.R]))
@@ -89,11 +89,12 @@ class Map(object):
 		radii = hypot(x, y)
 		thetas = arctan2(y, x) - theta0
 		E = P_r(radii)
-		d += exp(P.theta(thetas)) * (E - H)
-		#print v, d
-		Z = exp(d).sum()
-		if Z!=0:
-			return exp(d) / Z
+		self.d += exp(P.theta(thetas)) * (E - H)
+		#print v, self.d
+	@property
+	def p(self)
+		'''returns non-log probabilities'''
+		return exp(self.d)
 if __name__=='__main__':
 	from myro import *
 	from numpy import array, set_printoptions, dot
