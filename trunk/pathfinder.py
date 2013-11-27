@@ -3,34 +3,36 @@ import numpy # currently unused, should be used for optimization
 from math import hypot
 from heapq import *
 import threading # might not be necessary if thread not started here
-import util # needed for state object
+#import util # needed for state object
+from time import sleep
 from model import Map
-obsbtaclemap = Map(None, 100, 100) # XXX values
+
+obstaclemap = Map(None, 40, 40) # XXX dimensions and initial P (currently grid points every 10 cm)
 
 def set_target(xy):
-	'''sets the target to x, y
-	returns immediately'''
-	newtarget = xy
+    '''sets the target to x, y
+    returns immediately'''
+    newtarget = xy
 
 # NOTES:
 # - call i() to start, stopThread to stop
 # - then call set_target on a target point (absolute coordinates)
-#	to set the target of the A*
+#   to set the target of the A*
 #
 # - `cost` and `neighbors` do special things based on the map data -- 
-#	that stuff still needs integration, currently each function is a 
-#	dummy for a blank, infinitely large 8-connected square grid
+#   that stuff still needs integration, currently each function is a 
+#   dummy for a blank, infinitely large 8-connected square grid
 #
 runThread = False
 def i():
-	global runThread
-	runThread = True
+    global runThread
+    runThread = True
     pFThread = threading.Thread(target=pathfinderThread)
     pFThread.start()
 
 def stopThread():
-	global runThread
-	runThread = False
+    global runThread
+    runThread = False
 
 """
 newtarget is None when there is no A* to do, 
@@ -51,13 +53,13 @@ g_score = {start:0} # best known cost from start
 f_score = {start:cost(start,finish)} # estimated total cost to target
 
 def resetAstar(new_start, new_finish):
-	"""
-	Reset the A* search space to do a search from given start position 
-	to given end position, return the generator object
-	"""
-	if new_finish is None or new_start is None:
-		return None
-	global start, finish, openset, closedset, camefrom, g_score, f_score
+    """
+    Reset the A* search space to do a search from given start position 
+    to given end position, return the generator object
+    """
+    if new_finish is None or new_start is None:
+        return None
+    global start, finish, openset, closedset, camefrom, g_score, f_score
     start, finish = new_start, new_finish
     openset = heapify([(cost(start, finish), start)])
     closedset = set([])
@@ -67,80 +69,83 @@ def resetAstar(new_start, new_finish):
     f_score = {start:cost(start,finish)} # estimated total cost to target
     return astar().next # returns generator's next function
 
+# XXX global pathpoints for debugging
+pathpoints = []
+
 iterastar = None
 def pathfinderThread():
-	"""The thread that continually waits on target change and 
-	runs A* whenever a new target is set"""
-	global iterastar
-	while runThread:
-		# stuff happens
-		if newtarget != finish:
-			start = util.state["where"][0], util.state["where"][1]
-			# we currently scrap partial paths, which might be useful, 
-			# but that's okay.
-			iterastar = resetAstar(start,newtarget)
-		if newtarget != None and iterastar != None:
-			try:
-				# step once thru A*
-				iterastar()
-			except StopIteration:
-				# A* finished, so we update state
-				util.state["pathpoints"] = trace_path(start, finish)
-				newtarget = None
+    """The thread that continually waits on target change and 
+    runs A* whenever a new target is set"""
+    global iterastar, pathpoints
+    while runThread:
+        # stuff happens
+        if newtarget != finish:
+            start = (0,0) #util.state["where"][0], util.state["where"][1]
+            # we currently scrap partial paths, which might be useful, 
+            # but that's okay.
+            iterastar = resetAstar(start,newtarget)
+        if newtarget != None and iterastar != None:
+            try:
+                # step once thru A*
+                iterastar()
+            except StopIteration:
+                # A* finished, so we update state
+                pathpoints = trace_path(start, finish)
+                newtarget = None
+        else:
+            sleep(50)
 
 def cost((x1,y1),(x2,y2)): 
-	"""
-	Returns the equivalent distance between two given points.
-	Currently assumes equivalent distance is Euclidean norm.
+    """
+    Returns the equivalent distance between two given points.
 
-	XXX Here is where the obstacle sensor comes in
-	"""
-	# XXX needs to check obstacle probability to evaluate cost
-	# XXX use obstaclemap.p
-	# XXX currently doesn't check edge cases (or even negative indices)
-	
-    return hypot(x1-x2,y1-y2)/(1-p[x2][y2]) # gonna get ugly -- 
-#		scales equivalent distance up with probability of obstacle at target
-# not quite it, will figure tomorrow :D
+    XXX Here is where the obstacle sensor comes in
+    """
+    # XXX needs to check obstacle probability to evaluate cost
+    # XXX use obstaclemap.p
+    # XXX currently doesn't check edge cases (or even negative indices)
+    
+    return hypot(x1-x2,y1-y2)#/(1-obstaclemap.p[x2][y2]) # commented out to ignore obstacles
+#   gonna get ugly -- 
+#   scales equivalent distance up with probability of obstacle at target
+#   not quite it, will figure tomorrow :D
 
 
 def neighbors(x,y=None):
-	"""
-	Generates all neighbors of input location.
-	We use a genexpr to produce neighbors because there may be important 
-	edge cases best handled before the neighbors are even created
+    """
+    Generates all neighbors of input location.
+    We use a genexpr to produce neighbors because there may be important 
+    edge cases best handled before the neighbors are even created
 
-	XXX another place the sensors can come in
-	"""
-	if isinstance(x,tuple): x,y = x[0], x[1]
+    XXX another place the sensors can come in
+    """
+    if isinstance(x,tuple): x,y = x[0], x[1]
     # XXX needs to check bounds to decide which neighbors get yielded
+    canleft, canright, canup, candown = x>0,x<obstaclemap.w-1,y>0,y<obstaclemap.h-1
     
-    yield (x + 1, y - 1)
-    yield (x + 1, y)
-    
-    yield (x + 1,y + 1)
-    yield (x, y + 1)
-    
-    yield (x - 1, y + 1)
-    yield (x - 1, y)
-    
-    yield (x - 1, y - 1)
-    yield (x, y - 1)
+    if canright:
+        if canup: yield (x + 1, y - 1)
+        yield (x + 1, y)
+        if candown: yield (x + 1,y + 1)
+    if candown: yield (x, y + 1)
+    if canleft:
+        if candown: yield (x - 1, y + 1)
+        yield (x - 1, y)
+        if canup: yield (x - 1, y - 1)
+    if canup: yield (x, y - 1)
 
 
-# will have to yield some value in between iterations 
-# (to pause and allow other calculations)
-# but what value would be useful?
+# pauses to yield current best subtarget
 
 # this A* is completely transparent in its workings so it can be 
 # interrupted with incomplete path if need be
 
 def astar():
     """
-	computes A* over an arbitrary graph generated by neighbors() 
-	and weighted by cost()
-	"""
-	done = 0
+    computes A* over an arbitrary graph generated by neighbors() 
+    and weighted by cost()
+    """
+    done = 0
     while openset and not done:
         current = heappop(openset)
         yield current # produces current best target, and distance to final target
@@ -163,11 +168,11 @@ def astar():
                     heappush(openset, (tentative_f,i))
 
 def trace_path(src, dest):
-	"""
-	Iterate backwards from dest, following came-from links until 
-	reaching src. Returns list of points on the path, starting at src, 
-	ending at dest.
-	"""
+    """
+    Iterate backwards from dest, following came-from links until 
+    reaching src. Returns list of points on the path, starting at src, 
+    ending at dest.
+    """
     path = [dest]
     cur = camefrom[dest]
     while cur != src:
@@ -177,9 +182,9 @@ def trace_path(src, dest):
     return list(reversed(path))
 
 def findloops(graph):
-	"""
-	A utility function for checking for problems in an A* came-from tree
-	"""
+    """
+    A utility function for checking for problems in an A* came-from tree
+    """
     for i in graph.keys():
         j = graph[i]
         l = []
@@ -206,3 +211,11 @@ print "####"
 findloops(camefrom)
 """
 
+if __name__ == "__main__":
+    i()
+    set_target((30,30))
+    print "stuff happens"
+    
+    input()
+    
+    
