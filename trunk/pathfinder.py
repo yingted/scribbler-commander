@@ -1,17 +1,31 @@
 #!/usr/bin/env python
-#XXX ^ must change to fit environment
-import numpy
+import numpy # currently unused, should be used for optimization
 from math import hypot
 from heapq import *
 import threading # might not be necessary if thread not started here
 import util # needed for state object
 
-def set_target((x,y)):
+def set_target(xy):
 	'''sets the target to x, y
 	returns immediately'''
-	newtarget = (x,y)
+	newtarget = xy
 	pass
 
+# NOTES:
+# - start `pathfinder_thread` in a thread, process or whatever
+# - then use `set_target` to set the target of the A*
+#
+# - `cost` and `neighbors` do special things based on the map data -- 
+#	that stuff still needs integration, currently each function is a 
+#	dummy for a blank, infinitely large 8-connected square grid
+#
+
+"""
+newtarget is None when there is no A* to do, 
+is equal to finish when the A* is being done,
+and is not equal to finish when the A* has to 
+be restarted with a new target.
+"""
 newtarget = None
 
 start = (0,0) # XXX Must get from state
@@ -41,10 +55,9 @@ def resetAstar(new_start, new_finish):
     camefrom = {}
     g_score = {start:0} # best known cost from start
     f_score = {start:cost(start,finish)} # estimated total cost to target
-    return astar() # returns generator
+    return astar().next # returns generator's next function
 
-
-def pathfinderThread():
+def pathfinder_thread():
 	"""The thread that continually waits on target change and 
 	runs A* whenever a new target is set"""
 	iterastar = nullGenerator
@@ -52,17 +65,18 @@ def pathfinderThread():
 		# stuff happens
 		if newtarget != finish:
 			start = (0,0) # XXX GET CURRENT POSITION FROM STATE
+			# is it start = util.state["position"] ? probably.
+			# we currently scrap partial paths, which might be useful, 
+			# but that's okay.
 			iterastar = resetAstar(start,newtarget)
-			newtarget = None
 		if newtarget != None:
 			try:
+				# step once thru A*
 				iterastar()
 			except StopIteration:
-				# XXX astar finished, so we need to either 
-				# alert something or update state (the latter probably)
-				
-				pass
-		continue
+				# A* finished, so we update state
+				util.state["pathpoints"] = trace_path(start, finish)
+				newtarget = None
 
 def cost((x1,y1),(x2,y2)): 
 	"""
@@ -71,8 +85,12 @@ def cost((x1,y1),(x2,y2)):
 
 	XXX Here is where the obstacle sensor comes in
 	"""
-#   return abs(x1-x2) + abs(y1-y2)
+	# XXX needs to check obstacle probability to evaluate cost
     return hypot(x1-x2,y1-y2)
+
+
+# XXX Needs updating to use real coords
+neighbor_step = 1
 
 def neighbors(x,y=None):
 	"""
@@ -83,10 +101,19 @@ def neighbors(x,y=None):
 	XXX another place the sensors can come in
 	"""
 	if isinstance(x,tuple): x,y = x[0], x[1]
-    yield (x+1, y)
-    yield (x-1, y)
-    yield (x, y+1)
-    yield (x, y-1)
+    # XXX needs to check bounds to decide which neighbors get yielded
+    
+    yield (x + neighbor_step, y - neighbor_step)
+    yield (x + neighbor_step, y)
+    
+    yield (x + neighbor_step,y + neighbor_step)
+    yield (x, y + neighbor_step)
+    
+    yield (x - neighbor_step, y + neighbor_step)
+    yield (x - neighbor_step, y)
+    
+    yield (x - neighbor_step, y - neighbor_step)
+    yield (x, y - neighbor_step)
 
 
 # will have to yield some value in between iterations 
@@ -123,12 +150,13 @@ def astar():
                 if i not in openset:
                     heappush(openset, (tentative_f,i))
     
-    
     pass #FAIL
 
 def trace_path(src, dest):
 	"""
-	
+	Iterate backwards from dest, following came-from links until 
+	reaching src. Returns list of points on the path, starting at src, 
+	ending at dest.
 	"""
     path = [dest]
     cur = camefrom[dest]
@@ -136,9 +164,12 @@ def trace_path(src, dest):
         #print cur
         path.append(cur)
         cur = camefrom[cur]
-    return reversed(path)
+    return list(reversed(path))
 
 def findloops(graph):
+	"""
+	A utility function for checking for problems in an A* came-from tree
+	"""
     for i in graph.keys():
         j = graph[i]
         l = []
@@ -149,7 +180,7 @@ def findloops(graph):
             l.append(j)
             j = graph[j]
 
-
+"""
 pathfinder = astar()
 for i in pathfinder:
 #   print i
@@ -163,5 +194,5 @@ print "###"
 #print camefrom[(0,0)]
 print "####"
 findloops(camefrom)
-
+"""
 
