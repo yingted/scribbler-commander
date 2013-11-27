@@ -137,10 +137,7 @@
 			</canvas>
 		</div>
 		<div id="photos">
-			
-			<ul>
-				
-			</ul>
+			<ul id="photo-list"></ul>
 		</div>
 		<script>
 			$(function(){
@@ -167,7 +164,7 @@
 					
 					var gridres=8;
 					
-					console.log(1.23);
+					//console.log(1.23);
 					var cp = "#0000FF";
 					var pp = "#00AA00";
 					var fp = "#D07000";
@@ -238,11 +235,14 @@
 							$("#photo-link").attr("href",data.path);
 						});
 				});
+				var photos=[];
 				$(document)
 					.on("connected",function(e,connected){
 						$("body").removeClass("connected disconnected").addClass((connected?"":"dis")+"connected");
 						$("input,button[name]").prop("disabled",!connected);
-					}).trigger("connected",false);
+					}).trigger("connected",false).on("photo",function(photo){
+						console.log("photo",photo);
+					});
 				var params="";
 				(function subscribe(){
 					$.ajax({
@@ -281,7 +281,7 @@
 							console.log("%o: %o at %o",a[i][0],a[i][1],a[i][2]);
 							var e=$.Event(a[i][0]);
 							e.timeStamp=a[i][2]*1000;
-							$(document).trigger(e,a[i][1]);
+							$(document).trigger(e,[a[i][1]]);
 						}
 						subscribe();
 					});
