@@ -171,9 +171,12 @@
 					gfx.beginPath();
 				
 				}
-				function updateMap(position,pTrail,trail,obstacles){
+				function updateMap(pos,pTrail,trail,obstacles){
 					var c=document.getElementById("map");
 					var gr=c.getContext("2d");
+					gr.save()
+					gr.translate(c.width/2,c.height/2);
+					gr.scale(100,100);//100 px/m
 					
 					var gridres=100;
 					
@@ -183,48 +186,48 @@
 					var fp = "#D07000";
 					var op = "#000000"; //don't change this colour
 					
-					//position=[x,y] in meters: position[0]=x, position[1]=y
+					//pos=[x,y] in meters: position[0]=x, position[1]=y
 					//pTrail=[[left_arclength,right_arclength],...]
 					//trail=[[left_arclength,right_arclength],...]
 					//0<=obstacles[i][j]<=1
 					
-					pos=[400,400]
-					pTrail=[[429,429],[444,429],[460,481]]
-					trail=[[380,380]]
+					//pos=[400,400]
+					//pTrail=[[429,429],[444,429],[460,481]]
+					//trail=[[380,380]]
 					
 					//obstacles=[[1,1,1,1],[0,0.5,0,1],[0.7,0.6,0.5,0.4],[0.1,0.2,0.4,0.8]]
-					obstacles = [];
-					var gridSize=800/gridres|0;
-					for (var i=0;i< gridSize; i++){
-						obstacles[i]=[];
-						for (var j=0;j<gridSize; j++){
-							obstacles[i][j]=Math.random();
-						
-						}
-					
-					}
-					
-					for (var i=0;i< obstacles.length ;i++){ 
-						for (var j = 0; j < obstacles[i].length;j++){
-							var hex=(255-(256*obstacles[i][j]|0)).toString(16);
-							while(hex.length<2)
-								hex="0"+hex;
-							fillTile(gr, [j*gridres, i*gridres], gridres, "#"+hex+hex+hex);
-						}
-					}
+					//obstacles = [];
+					//var gridSize=800/gridres|0;
+					//for (var i=0;i< gridSize; i++){
+					//	obstacles[i]=[];
+					//	for (var j=0;j<gridSize; j++){
+					//		obstacles[i][j]=Math.random();
+					//	
+					//	}
+					//
+					//}
+					//
+					//for (var i=0;i< obstacles.length ;i++){ 
+					//	for (var j = 0; j < obstacles[i].length;j++){
+					//		var hex=(255-(256*obstacles[i][j]|0)).toString(16);
+					//		while(hex.length<2)
+					//			hex="0"+hex;
+					//		fillTile(gr, [j*gridres, i*gridres], gridres, "#"+hex+hex+hex);
+					//	}
+					//}
 					
 					for (var i=0;i<pTrail.length;i++){ 
-						fillCircle(gr,pTrail[i],3,pp);
+						fillCircle(gr,pTrail[i],.03,pp);
 					}		
 					
-					for (var i=0;i<trail.length;i++){ 
-						fillCircle(gr,trail[i],3,fp);
-					}	
+					//for (var i=0;i<trail.length;i++){ 
+					//	fillCircle(gr,trail[i],3,fp);
+					//}	
 					
-					fillCircle(gr,pos,5,cp);
+					fillCircle(gr,pos,.14,cp);
 					
 					
-					
+					gr.restore();
 				}
 				(function update(){
 					$.post("/battery")
