@@ -12,13 +12,24 @@ def set_target(xy):
 	pass
 
 # NOTES:
-# - start `pathfinder_thread` in a thread, process or whatever
-# - then use `set_target` to set the target of the A*
+# - call i() to start, stopThread to stop
+# - then call set_target on a target point (absolute coordinates)
+#	to set the target of the A*
 #
 # - `cost` and `neighbors` do special things based on the map data -- 
 #	that stuff still needs integration, currently each function is a 
 #	dummy for a blank, infinitely large 8-connected square grid
 #
+runThread = False
+def i():
+	global runThread
+	runThread = True
+    pFThread = threading.Thread(target=pathfinderThread)
+    pFThread.start()
+
+def stopThread():
+	global runThread
+	runThread = False
 
 """
 newtarget is None when there is no A* to do, 
@@ -49,6 +60,7 @@ def resetAstar(new_start, new_finish):
 	"""
 	if new_finish is None or new_start is None:
 		return nullGenerator # stops iterating immediately
+	global start, finish, openset, closedset, camefrom, g_score, f_score
     start, finish = new_start, new_finish
     openset = heapify([(cost(start, finish), start)])
     closedset = set([])
@@ -57,11 +69,11 @@ def resetAstar(new_start, new_finish):
     f_score = {start:cost(start,finish)} # estimated total cost to target
     return astar().next # returns generator's next function
 
-def pathfinder_thread():
+def pathfinderThread():
 	"""The thread that continually waits on target change and 
 	runs A* whenever a new target is set"""
 	iterastar = nullGenerator
-	while True:
+	while runThread:
 		# stuff happens
 		if newtarget != finish:
 			start = (0,0) # XXX GET CURRENT POSITION FROM STATE
