@@ -23,7 +23,13 @@ def playsong(song):
         else:
             beep(a[0],freq(a[1]),freq(a[2]))
         
+
+            
+def playnote(a):
+    if len(a)==2:
+        beep(a[0],freq(a[1]))
+    else:
+        beep(a[0],freq(a[1]),freq(a[2]))
         
 playsong("fur elise")
-
 
