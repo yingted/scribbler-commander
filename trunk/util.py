@@ -40,13 +40,13 @@ def get_obstacle(emitters):
 		return(robots.scribbler.read_2byte(robot.ser)+2**15)%2**16-2**15
 	finally:
 		robot.lock.release()
-def get_encoders(zero=False):
+def get_encoders(keep=True):
 	'''returns encoder values, optionally resetting them'''
 	try:
 		robot.lock.acquire()
-		robot.ser.write(struct.pack('BB',171,zero)+'\0'*7)
+		robot.ser.write(struct.pack('BB',171,keep)+'\0'*7)
 		robot.ser.read(9)
-		return struct.unpack('<II',robot.ser.read(8))
+		return tuple(-x%2**32 for x in struct.unpack('>II',robot.ser.read(8)))
 	finally:
 		robot.lock.release()
 def grab_jpeg_color(out, reliable):
