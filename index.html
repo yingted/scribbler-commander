@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="UTF-8">
 		<title>commander</title>
-		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+		<script src="/static/js/jquery-1.10.2.min.js"></script>
 		<style>
 			#photo{
 				float:right;
@@ -12,14 +12,98 @@
 				border:1px solid black;
 			}
 			#map{
-				border:1px solid black;
+			       background:white;
+				height:100%;
+				margin:0 auto;			
 			}
+			#map-container{
+				position:absolute;
+				top:0;
+				bottom:0;
+				left:0;
+				right:0;
+				background:#B8B8B8;
+				z-index:-1;
+				padding-left:232px;
+				padding-right:300px;
+				text-align:center;
+			}
+
+			#battery{
+				height:1.5em;
+				width:200px;
+				background-color:#777;
+				margin:0 auto;
+				position:relative;
+			}
+			#battery-level{
+				height:100%;
+				width:0%;
+				background-color:green;
+			}
+			#battery-percent{
+				position:absolute;
+				left:0;
+				right:0;
+				bottom:0;
+				top:0;
+			}
+			fieldset{
+				position:relative;
+			}
+			html,body{
+				overflow:hidden;
+				margin:0;
+			}
+			form{
+				background:#D8D8D8;
+				top: 0;
+				bottom:0;
+				width: 232px;
+				left:0;
+				position:absolute;
+				margin:0;
+				text-align:center;
+			}
+			#photos{
+				position:absolute;
+				right:0;
+				top:0;
+				bottom:0;
+				background:white;
+				float:right;
+				width:300px;
+				overflow-y:auto;
+				background:#D8D8D8;
+			}
+			#photos li{
+				list-style-type:none;
+			}
+			#search{
+			       background:#33CC33;
+				width: 5em;
+				height:2em;
+				font-size:40px;
+				color: white;
+			}
+			#search:hover{
+				background-color: #3F3;
+			}
+			
 		</style>
 	</head>
 	<body class="disconnected">
 		<form method="post">
-			<a id="photo-link" target="_blank"><img id="photo" alt="no image"></a>
-			<fieldset>
+			<img id="arrows" usemap="#move" src="static/css/MoveArrows.png" alt="Move Arrows">
+			<map name="move">
+				<area shape="poly" coords="116,5,148,53,131,53,131,121,102,121,101,53,85,53" href="#" title="Move forwards" name="forward"> 
+				<area shape="poly" coords="102,220,130,220,130,288,148,288,117,335,85,288,101,288" href="#" title="Move backwards" name="backward"> 
+				<area shape="circle" coords="115,170,40" href="#" alt="Stop" name="stop"> 
+				<area shape="poly" coords="183,84,194,97,202,112,209,128,214,146,216,162,216,180,214,197,209,213,201,231,224,245,166,271,154,208,179,219,188,203,194,184,194,166,192,148,184,128,177,113,165,98" href="#" title="Turn right" name="right"> 
+			       <area shape="poly" coords="47,84,36,97,28,112,21,128,16,146,14,162,14,180,16,197,21,213,29,231,6,245,64,271,76,208,51,219,42,203,36,184,36,166,38,148,46,128,53,113,65,98" href="#" title="Turn left" name="left"> 
+			</map>
+			<!--<a id="photo-link" target="_blank"><img id="photo" alt="no image"></a>-->
+			<!--<fieldset>
 				<legend>motor controls</legend>
 				<button type="submit" name="do" value="stop">stop</button>
 				<br>
@@ -30,21 +114,34 @@
 				<button type="submit" name="do" value="right">right</button>
 			</fieldset>
 			<fieldset>
-				<legend>high-level controls</legend>
-				<button type="submit" name="go" value="photo">take a photo</button>
+				<legend>high-level controls</legend>			
 			</fieldset>
 			<fieldset>
 				<legend>sensors</legend>
 				<label for="battery">battery</label>
 				<input id="battery">
-			</fieldset>
-			<fieldset>
-				<legend>map</legend>
-				<canvas id="map" width="800" height="800">
-					cannot show map
-				</canvas>
-			</fieldset>
+			</fieldset>-->
+			
+			<button type="submit" name="do" value="Search" id="search" title = "Explore the area">Search</button>
+			<input type="image" id="camera" name="go" value="photo" src="static/css/camera.png" width="200" height="150" title="Take a picture">
+			<div id="battery">
+				<div id="battery-level"></div>
+				<div id="battery-percent">
+					Loading
+				</div>
+			</div>
 		</form>
+		<div id="map-container">
+			<canvas id="map" width="800" height="800"">
+				cannot show map
+			</canvas>
+		</div>
+		<div id="photos">
+			
+			<ul>
+				
+			</ul>
+		</div>
 		<script>
 			$(function(){
 				function fillCircle(gfx,pos,r,c){
@@ -122,13 +219,14 @@
 				setInterval(function(){updateMap(null,null,null,null)},33);
 				(function update(){
 					$.post("/battery")
-						.done(function(data){
-							$("#battery").val(data);
+						.done(function(battery){
+							$("#battery-percent").text("Battery Life: "+(battery*100).toFixed(1)+"%");
+							$("#battery-level").css({width:battery*100+"%"});
 						}).always(function(){
 							setTimeout(update,10000);
 						});
 				})();
-				$("form [name=do]").click(function(e){
+				$("form [name=do],map[name=move] area[name]").click(function(e){
 					e.preventDefault();
 					$.post("/"+$(this).val());
 				});
@@ -190,5 +288,6 @@
 				})();
 			});
 		</script>
+			
 	</body>
 </html>
