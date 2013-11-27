@@ -4,6 +4,8 @@ from scipy.integrate import quad
 from scipy.interpolate import UnivariateSpline
 from util import memoize, xp_initialize, get_obstacle
 from itertools import cycle, islice
+
+obsbtaclemap = Map(None, 100,100) # XXX values
 def _floor_clip(v, lo, hi):
 	if isinstance(v, ndarray):
 		return v.astype('int').clip(lo, hi)

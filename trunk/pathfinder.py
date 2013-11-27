@@ -4,12 +4,12 @@ from math import hypot
 from heapq import *
 import threading # might not be necessary if thread not started here
 import util # needed for state object
+from model import obstaclemap
 
 def set_target(xy):
 	'''sets the target to x, y
 	returns immediately'''
 	newtarget = xy
-	pass
 
 # NOTES:
 # - call i() to start, stopThread to stop
@@ -95,7 +95,12 @@ def cost((x1,y1),(x2,y2)):
 	XXX Here is where the obstacle sensor comes in
 	"""
 	# XXX needs to check obstacle probability to evaluate cost
-    return hypot(x1-x2,y1-y2)
+	# XXX use obstaclemap.p
+	# XXX currently doesn't check edge cases (or even negative indices)
+	
+    return hypot(x1-x2,y1-y2)/(1-p[x2][y2]) # gonna get ugly -- 
+#		scales equivalent distance up with probability of obstacle at target
+# not quite it, will figure tomorrow :D
 
 
 # XXX Needs updating to use real coords
@@ -158,8 +163,6 @@ def astar():
                 f_score[i] = tentative_f
                 if i not in openset:
                     heappush(openset, (tentative_f,i))
-    
-    pass #FAIL
 
 def trace_path(src, dest):
 	"""
