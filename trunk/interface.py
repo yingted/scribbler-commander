@@ -22,7 +22,7 @@ def update(*t_key_val):
 	try:
 		deltas_change.acquire()
 		deltas.append(t_key_val)
-		deltas_change.notify_all()
+		deltas_change.notifyAll()
 	finally:
 		deltas_change.release()
 class Subscription(object):
@@ -77,8 +77,11 @@ class ScribblerCommander(object):
 	@ajax#XXX handle non-ajax
 	def photo(self):
 		try:
+			print'photo'
 			deltas_change.acquire()
+			print'need photo'
 			if util.state.age('photo') > self.photo_delay:
+				print'taking photo'
 				filename = 'photos/%s.jpg' % datetime.datetime.now().isoformat()
 				fd = open(filename, 'w')
 				try:
@@ -128,8 +131,12 @@ class ScribblerCommander(object):
 	@ajax
 	def history(self, key, t=None):
 		'''return history before t'''
+		if t is None:
+			t = float('inf')
+		else:
+			t = float(t)
 		if key in util.state:
-			return [elt for elt in util.state.history(key) if elt[2] < t]
+			return [elt for elt in util.state.history(key) if elt[0] < t]
 		return []
 	@ajax
 	def set_target(self, x=None, y=None):
