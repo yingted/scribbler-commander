@@ -42,6 +42,7 @@ class Subscription(object):
 			finally:
 				deltas_change.release()
 class ScribblerCommander(object):
+	photo_delay = 1.#s
 	@cherrypy.expose
 	def index(self, do=None):
 		# check if action is safe
