@@ -1,18 +1,16 @@
-#from util import get_encoders
-def get_encoders(reset):
-    return [10000,9999]
+from util import *
 import time
 import threading
 import math
-DISTANCE_PER_COUNT = 0.491426637992914#MILLIMETERS
-ROBOT_DIAMETER = 147#Measurement in millimeters
+DISTANCE_PER_COUNT = 0.000491426637992914#METERS
+ROBOT_DIAMETER = 0.142#Measurement in meters
 DEFAULT_DIGITS = 6
-PRINT_COORDINATES = True
+PRINT_COORDINATES = False
 UPDATE_INTERVAL = 0.1#seconds
 runThread = True
 
-x_pos = 0.0#IN MILLIMETERS
-y_pos = 0.0#IN MILLIMETERS
+x_pos = 0.0#IN METERS
+y_pos = 0.0#IN METERS
 robotHeading = 0.0
 moveHistory = []
 previousTime = time.time()
@@ -25,7 +23,7 @@ def reset_deadReckoning():
     robotHeading = 0.0
     moveHistory = []
     previousTime = time.time()
-    get_encoders(True)
+    get_encoders(False)
 
 #initializes dead reckoning odometry thread
 def i():#nitialize_deadReckoning
@@ -49,10 +47,11 @@ def deadReckoningThread():
 #updates the position
 def update():
     global x_pos, y_pos, robotHeading
-    encoders = get_encoders(True)#gets number of encoder counts and reset it to 0
-    distanceLeft = float(encoders[0])*DISTANCE_PER_COUNT#gets distance travelled by left wheel
-    distanceRight = float(encoders[1])*DISTANCE_PER_COUNT#gets distance travelled by right wheel
+    encoders = get_encoders(False)#gets number of encoder counts and reset it to 0
+    distanceLeft = float(encoders[0])*DISTANCE_PER_COUNT/2.0#gets distance travelled by left wheel
+    distanceRight = float(encoders[1])*DISTANCE_PER_COUNT/2.0#gets distance travelled by right wheel
     moveHistory.append([distanceLeft,distanceRight,time.time()-previousTime])
+    #istate['wheel_speed']=distanceLeft/(time.time()-previousTime),distanceRight/(time.time()-previousTime)
     cosCurrentAngle = math.cos(robotHeading)#cosine of current angle
     sinCurrentAngle = math.sin(robotHeading)#sine of current angle
     if(encoders[0]==encoders[1]):#if the distances are equal (robot is going straight)
@@ -71,7 +70,7 @@ def stopThread():
 
 #gets coordinates
 def getCoords(numberOfDigits=DEFAULT_DIGITS):
-    print "(" + str(round(x_pos*0.001,numberOfDigits)) + "," + str(round(y_pos*0.001,numberOfDigits)) + " at angle "+str(round(robotHeading,numberOfDigits))+")"
+    print "(" + str(round(x_pos,numberOfDigits)) + "," + str(round(y_pos,numberOfDigits)) + " at angle "+str(round(robotHeading,numberOfDigits))+")"
 
 def getX():
     return x_pos
@@ -82,14 +81,18 @@ def getY():
 def getHeading():
     return robotHeading
 
-def getMoveHistory(depth):#returns in reverse chronological order
+def getMoveHistory(depth=None):#returns in reverse chronological order
+    '''returns list of (left_arclength,right_arclength)'''
     output = []
-    for i in range(len(moveHistory)-1,len(moveHistory)-1-depth,-1):
+    if depth is None:
+        end=0
+    else:
+        end=len(moveHistory)-depth
+    for i in range(len(moveHistory)-1,end-1,-1):
         output.append(moveHistory[i])
     return output
 
-'''
+
 if __name__=='__main__':
-    from util import *
     xp_initialize()
-'''
+    
