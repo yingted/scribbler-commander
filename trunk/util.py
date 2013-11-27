@@ -51,7 +51,6 @@ def get_encoders(keep=True):
 		robot.lock.release()
 def grab_jpeg_color(out, reliable):
 	'''reads a jpeg scan to a file.write function'''
-	start=time.time()
 	try:
 		robot.lock.acquire()
 		if robot.color_header == None:
@@ -81,7 +80,6 @@ def grab_jpeg_color(out, reliable):
 			print 'got image\n%.3f %.3f' % (((bm1 - bm0) / freq), ((bm2 - bm1) / freq))
 	finally:
 		robot.lock.release()
-	print time.time()-start
 def memoize(func):
 	'''decorator to naively memoize function calls'''
 	cache={}
@@ -90,6 +88,15 @@ def memoize(func):
 			cache[args] = func(*args)
 		return cache[args]
 	return wrapped
+def every(seconds, *args, **kwargs):
+	def decorator(f):
+		def update():
+			t = threading.Timer(seconds, update)
+			f(*args, **kwargs)
+			t.start()
+		update()
+		return f
+	return decorator
 class State(shelve.DbfilenameShelf):
 	'''persistent state
 	TODO allow loading only part of the state'''
