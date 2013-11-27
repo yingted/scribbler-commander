@@ -92,7 +92,7 @@ class Map(object):
 		#print v, d
 		Z = exp(d).sum()
 		if Z!=0:
-			p = exp(d) / Z
+			return exp(d) / Z
 if __name__=='__main__':
 	from myro import *
 	from numpy import array, set_printoptions, dot
