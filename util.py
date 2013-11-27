@@ -9,7 +9,7 @@ import collections
 import shelve
 import time
 import atexit
-_use_simulator = False
+_use_simulator = True
 def simulator_started():
 	# connect to myro
 	try:
