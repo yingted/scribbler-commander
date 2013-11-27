@@ -44,8 +44,8 @@ def get_encoders(zero=False):
 	'''returns encoder values, optionally resetting them'''
 	try:
 		robot.lock.acquire()
-		robot.ser.write(struct.pack('BB',171,zero))
-		#return robot.read_uint32(),robot.read_uint32()
+		robot.ser.write(struct.pack('BB',171,zero)+'\0'*7)
+		robot.ser.read(9)
 		return struct.unpack('<II',robot.ser.read(8))
 	finally:
 		robot.lock.release()
