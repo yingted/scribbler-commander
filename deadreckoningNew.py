@@ -1,14 +1,14 @@
-from util.py import *
+from util import get_encoders
 import threading
-DISTANCE_PER_COUNT = 0.491#MILLIMETERS
+DISTANCEPER_COUNT = 0.491#MILLIMETERS
 ROBOT_DIAMETER = 0.15#Measurement
 DEFAULT_DIGITS = 6
 PRINT_COORDINATES = True
 UPDATE_INTERVAL = 0.1#seconds
 
-x_pos#IN MILLIMETERS
-y_pos#IN MILLIMETERS
-robotHeading
+x_pos = 0#IN MILLIMETERS
+y_pos = 0#IN MILLIMETERS
+robotHeading = 0
 
 #resets coordinates
 def reset_deadReckoning():
@@ -30,7 +30,7 @@ def deadReckoningThread():
         time.sleep(UPDATE_INTERVAL)
         update()
         if(PRINT_COORDINATES):
-            getCoords()
+            getCoords(DEFAULT_DIGITS)
 
 #updates the position
 def update():
@@ -62,3 +62,8 @@ def getY():
 
 def getHeading():
     return robotHeading
+
+if __name__=='__main__':
+    from util import *
+    xp_initialize()
+    
