@@ -175,7 +175,7 @@
 					var c=document.getElementById("map");
 					var gr=c.getContext("2d");
 					
-					var gridres=8;
+					var gridres=100;
 					
 					//console.log(1.23);
 					var cp = "#0000FF";
@@ -226,7 +226,6 @@
 					
 					
 				}
-				//setInterval(function(){updateMap(null,null,null,null)},33);
 				(function update(){
 					$.post("/battery")
 						.done(function(battery){
@@ -248,7 +247,7 @@
 							$("#photo-link").attr("href",data.path);
 						});
 				});
-				var photos=[];
+				var photos=[],state={},trail=[];
 				$(document)
 					.on("connected",function(e,connected){
 						$("body").removeClass("connected disconnected").addClass((connected?"":"dis")+"connected");
@@ -257,6 +256,10 @@
 							$("battery-level").text("not connected");
 					}).trigger("connected",false).on("photo",function(e,photo){
 						$("#templates>.photo-item").clone().prependTo("#photo-list").find("img").attr("src",photo.path);
+					}).on("trail",function(e,data){
+						trail.push(data);
+					}).on("where trail",function(){
+						updateMap(state.where,trail.reverse(),null,null);
 					});
 				var params="";
 				(function subscribe(){
@@ -294,10 +297,15 @@
 										return $elt[0];
 									}).appendTo("#photo-list");
 								});
+							$.post("/history?key=trail&t="+data.t)
+								.done(function(prefix){
+									trail=prefix.concat(trail);
+								});
 						}
 						params="?t="+data.t;
 						for(var a=data.deltas,i=0;i<a.length;++i){
 							console.log("%o: %o at %o",a[i][0],a[i][1],a[i][2]);
+							state[a[i][0]]=a[i][1];
 							var e=$.Event(a[i][0]);
 							e.timeStamp=a[i][2]*1000;
 							$(document).trigger(e,[a[i][1]]);
