@@ -4,6 +4,9 @@ import numpy
 from math import hypot
 from heapq import *
 
+def set_target((x,y)):
+	'''sets the target to x, y
+	returns immediately'''
 
 #grid = [[-1 for i in xrange(10)] for j in xrange(10)]
 

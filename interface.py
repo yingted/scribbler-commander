@@ -127,6 +127,13 @@ class ScribblerCommander(object):
 		if key in util.state:
 			return [elt for elt in util.state.history(key) if elt[2] < t]
 		return []
+	@ajax
+	def set_target(self, x=None, y=None):
+		'''sets the pathfinding target'''
+		if y is None:
+			pathfinder.set_target(None)
+		else:
+			pathfinder.set_target((x, y))
 if __name__=="__main__":
 	current_dir = os.path.dirname(os.path.abspath(__file__))
 	config = {
