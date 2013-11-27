@@ -4,7 +4,8 @@ from math import hypot
 from heapq import *
 import threading # might not be necessary if thread not started here
 import util # needed for state object
-from model import obstaclemap
+from model import Map
+obsbtaclemap = Map(None, 100, 100) # XXX values
 
 def set_target(xy):
 	'''sets the target to x, y
