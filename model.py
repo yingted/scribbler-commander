@@ -1,7 +1,10 @@
 from pickle import load
-from numpy import arange, pi, exp, log, tan, arctan, linspace, around, ndarray, array, ones
-from scipy.integrate import quad
-from scipy.interpolate import UnivariateSpline
+from numpy import arange, pi, exp, log, tan, arctan, linspace, around, ndarray, array, ones, mgrid
+try:
+    from scipy.integrate import quad
+    from scipy.interpolate import UnivariateSpline
+except ImportError:
+    pass
 from util import memoize, xp_initialize, get_obstacle
 from itertools import cycle, islice
 
@@ -74,7 +77,7 @@ class Map(object):
 		rho = .15
 		self.log_rho = log(rho)
 		lambd = .6
-		self.d = ones((w, h)) * log_rho#log-probabilities
+		self.d = ones((w, h)) * self.log_rho#log-probabilities
 		self.R = tan(linspace(0, arctan(P._max_r / P._h), num=3 * P._N+1)) * P._h
 	def update(self, x0, y0, theta0, irp, v):
 		'''update the map using sensor data
@@ -93,7 +96,7 @@ class Map(object):
 		self.d += exp(P.theta(thetas)) * (E - H)
 		#print v, self.d
 	@property
-	def p(self)
+	def p(self):
 		'''returns non-log probabilities'''
 		return exp(self.d)
 if __name__=='__main__':
