@@ -25,7 +25,7 @@
 				background:#B8B8B8;
 				z-index:-1;
 				padding-left:232px;
-				padding-right:300px;
+				padding-right:340px;
 				text-align:center;
 			}
 
@@ -40,6 +40,9 @@
 				height:100%;
 				width:0%;
 				background-color:green;
+			}
+			.disconnected #battery-level{
+			background-color: grey;
 			}
 			#battery-percent{
 				position:absolute;
@@ -72,7 +75,7 @@
 				bottom:0;
 				background:white;
 				float:right;
-				width:300px;
+				width:340px;
 				overflow-y:auto;
 				background:#D8D8D8;
 			}
@@ -239,7 +242,9 @@
 				$(document)
 					.on("connected",function(e,connected){
 						$("body").removeClass("connected disconnected").addClass((connected?"":"dis")+"connected");
-						$("input,button[name]").prop("disabled",!connected);
+						$("input").prop("disabled",!connected);
+						if(!connected)
+							$("battery-level").text("not connected");
 					}).trigger("connected",false).on("photo",function(photo){
 						console.log("photo",photo);
 					});
