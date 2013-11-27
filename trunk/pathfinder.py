@@ -103,9 +103,6 @@ def cost((x1,y1),(x2,y2)):
 # not quite it, will figure tomorrow :D
 
 
-# XXX Needs updating to use real coords
-neighbor_step = 1
-
 def neighbors(x,y=None):
 	"""
 	Generates all neighbors of input location.
@@ -117,17 +114,17 @@ def neighbors(x,y=None):
 	if isinstance(x,tuple): x,y = x[0], x[1]
     # XXX needs to check bounds to decide which neighbors get yielded
     
-    yield (x + neighbor_step, y - neighbor_step)
-    yield (x + neighbor_step, y)
+    yield (x + 1, y - 1)
+    yield (x + 1, y)
     
-    yield (x + neighbor_step,y + neighbor_step)
-    yield (x, y + neighbor_step)
+    yield (x + 1,y + 1)
+    yield (x, y + 1)
     
-    yield (x - neighbor_step, y + neighbor_step)
-    yield (x - neighbor_step, y)
+    yield (x - 1, y + 1)
+    yield (x - 1, y)
     
-    yield (x - neighbor_step, y - neighbor_step)
-    yield (x, y - neighbor_step)
+    yield (x - 1, y - 1)
+    yield (x, y - 1)
 
 
 # will have to yield some value in between iterations 
