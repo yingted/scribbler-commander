@@ -55,9 +55,20 @@
 					gfx.fillStyle = oldc;
 					gfx.beginPath();
 				}
+				function fillTile(gfx,pos,r,c){
+					var oldc=gfx.fillStyle;
+					gfx.fillStyle=c;
+					gfx.rect(pos[0],pos[1],r,r);
+					gfx.fill();
+					gfx.fillStyle = oldc;
+					gfx.beginPath();
+				
+				}
 				function updateMap(position,pTrail,trail,obstacles){
 					var c=document.getElementById("map");
 					var gr=c.getContext("2d");
+					
+					var gridres=8;
 					
 					console.log(1.23);
 					var cp = "#0000FF";
@@ -74,26 +85,36 @@
 					pTrail=[[429,429],[444,429],[460,481]]
 					trail=[[380,380]]
 					
-					obstacles=[[1,1,1,1],[0,0.5,0,1],[0.7,0.6,0.5,0.4],[0.1,0.2,0.4,0.8]]
+					//obstacles=[[1,1,1,1],[0,0.5,0,1],[0.7,0.6,0.5,0.4],[0.1,0.2,0.4,0.8]]
+					obstacles = [];
+					var gridSize=800/gridres|0;
+					for (var i=0;i< gridSize; i++){
+						obstacles[i]=[];
+						for (var j=0;j<gridSize; j++){
+							obstacles[i][j]=Math.random();
+						
+						}
 					
+					}
 					
-					var grid_width = 40; // must change
-					var grid_height = 40;// must change
 					for (var i=0;i< obstacles.length ;i++){ 
 						for (var j = 0; j < obstacles[i].length;j++){
-							fillCircle(gr, [j*grid_width, i*grid_height], 3, "#"+(255-(255*obstacles[i][j])).toString(16) + (255-(255*obstacles[i][j])).toString(16) + (255-(255*obstacles[i][j])).toString(16));
+							var hex=(255-(256*obstacles[i][j]|0)).toString(16);
+							while(hex.length<2)
+								hex="0"+hex;
+							fillTile(gr, [j*gridres, i*gridres], gridres, "#"+hex+hex+hex);
 						}
 					}
 					
 					for (var i=0;i<pTrail.length;i++){ 
-						fillCircle(gr,pTrail[i],1,pp);
+						fillCircle(gr,pTrail[i],3,pp);
 					}		
 					
 					for (var i=0;i<trail.length;i++){ 
-						fillCircle(gr,trail[i],1,fp);
+						fillCircle(gr,trail[i],3,fp);
 					}	
 					
-					fillCircle(gr,pos,2,cp);
+					fillCircle(gr,pos,5,cp);
 					
 					
 					
