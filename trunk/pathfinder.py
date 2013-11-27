@@ -49,39 +49,36 @@ camefrom = {}
 g_score = {start:0} # best known cost from start
 f_score = {start:cost(start,finish)} # estimated total cost to target
 
-# probably too ugly of a hack to work
-def nullGenerator():
-	raise StopIteration
-
 def resetAstar(new_start, new_finish):
 	"""
 	Reset the A* search space to do a search from given start position 
 	to given end position, return the generator object
 	"""
 	if new_finish is None or new_start is None:
-		return nullGenerator # stops iterating immediately
+		return None
 	global start, finish, openset, closedset, camefrom, g_score, f_score
     start, finish = new_start, new_finish
     openset = heapify([(cost(start, finish), start)])
     closedset = set([])
     camefrom = {}
+    util.state["pathpoints"] = []
     g_score = {start:0} # best known cost from start
     f_score = {start:cost(start,finish)} # estimated total cost to target
     return astar().next # returns generator's next function
 
+iterastar = None
 def pathfinderThread():
 	"""The thread that continually waits on target change and 
 	runs A* whenever a new target is set"""
-	iterastar = nullGenerator
+	global iterastar
 	while runThread:
 		# stuff happens
 		if newtarget != finish:
-			start = (0,0) # XXX GET CURRENT POSITION FROM STATE
-			# is it start = util.state["position"] ? probably.
+			start = util.state["where"][0], util.state["where"][1]
 			# we currently scrap partial paths, which might be useful, 
 			# but that's okay.
 			iterastar = resetAstar(start,newtarget)
-		if newtarget != None:
+		if newtarget != None and iterastar != None:
 			try:
 				# step once thru A*
 				iterastar()
