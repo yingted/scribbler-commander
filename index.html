@@ -11,6 +11,9 @@
 				height:192px;
 				border:1px solid black;
 			}
+			#map{
+				border:1px solid black;
+			}
 		</style>
 	</head>
 	<body class="disconnected">
@@ -35,9 +38,21 @@
 				<label for="battery">battery</label>
 				<input id="battery">
 			</fieldset>
+			<fieldset>
+				<legend>map</legend>
+				<canvas id="map" width="400" height="400">
+					cannot show map
+				</canvas>
+			</fieldset>
 		</form>
 		<script>
 			$(function(){
+				function updateMap(position,pTrail,trail,obstacles){
+					//position=[x,y] in meters: position[0]=x, position[1]=y
+					//pTrail=[[left_arclength,right_arclength],...]
+					//trail=[[left_arclength,right_arclength],...]
+					//0<=obstacles[i][j]<=1
+				}
 				(function update(){
 					$.post("/battery")
 						.done(function(data){
