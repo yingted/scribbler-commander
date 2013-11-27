@@ -46,7 +46,7 @@ def get_encoders(keep=True):
 		robot.lock.acquire()
 		robot.ser.write(struct.pack('BB',171,keep)+'\0'*7)
 		robot.ser.read(9)
-		return tuple(int(-x%2**32)for x in struct.unpack('>II',robot.ser.read(8)))
+		return tuple(int((2**31-x)%2**32-2**31)for x in struct.unpack('>II',robot.ser.read(8)))
 	finally:
 		robot.lock.release()
 def grab_jpeg_color(out, reliable):
