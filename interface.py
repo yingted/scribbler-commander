@@ -43,7 +43,7 @@ class Subscription(object):
 			finally:
 				deltas_change.release()
 class ScribblerCommander(object):
-	photo_delay = 1.#s
+	#photo_delay = 1.#s
 	@cherrypy.expose
 	def index(self, do=None):
 		# check if action is safe
@@ -75,10 +75,11 @@ class ScribblerCommander(object):
 		except AttributeError:
 			raise cherrypy.HTTPError(503, 'Service Unavailable')
 	@ajax#XXX handle non-ajax
-	def photo(self):
+	@util.every(10)
+	def photo(self=None):
 		try:
 			deltas_change.acquire()
-			if util.state.age('photo') > self.photo_delay:
+			if util.state.age('photo') > 1.:
 				filename = 'photos/%s.jpg' % datetime.datetime.now().isoformat()
 				fd = open(filename, 'w')
 				try:
