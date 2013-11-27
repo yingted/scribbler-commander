@@ -77,11 +77,8 @@ class ScribblerCommander(object):
 	@ajax#XXX handle non-ajax
 	def photo(self):
 		try:
-			print'photo'
 			deltas_change.acquire()
-			print'need photo'
 			if util.state.age('photo') > self.photo_delay:
-				print'taking photo'
 				filename = 'photos/%s.jpg' % datetime.datetime.now().isoformat()
 				fd = open(filename, 'w')
 				try:
@@ -121,7 +118,7 @@ class ScribblerCommander(object):
 			if deltas and deltas[-1][0] > t:
 				i = bisect.bisect_left(deltas, (numpy.nextafter(t, t+1),))
 				j = len(deltas)
-				return {'t':deltas[j-1][0], 'deltas':deltas[i:j]}
+				return {'t':deltas[j-1][0], 'deltas':[(key, val, t) for (t, key, val) in deltas[i:j]]}
 			try:
 				deltas_change.acquire()
 				deltas_change.wait(25)
