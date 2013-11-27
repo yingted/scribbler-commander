@@ -148,6 +148,7 @@ def connect_async(cb=None):
 	else:
 		state['connected'] = False
 		xp_initialize()
+		deadreckoning.initialize_deadReckoning()
 	state['connected'] = True
 	if cb is not None:
 		cb()
