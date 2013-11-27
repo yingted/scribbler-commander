@@ -77,7 +77,8 @@ class Map(object):
 		self.R = tan(linspace(0, arctan(P._max_r / P._h), num=3 * P._N+1)) * P._h
 	def update(self, x0, y0, theta0, irp, v):
 		'''update the map using sensor data
-		x0, y0, theta0 are standard mathematics x, y, theta'''
+		x0, y0, theta0 are standard mathematics x, y, theta
+		returns probabilities at self.x and self.y or None on failure'''
 		d = (d - self.log_rho) * self.lambd + self.log_rho
 		H = P.v(irp, v)
 		# use P_r(r) as a cached for P(irp, v, r) 
