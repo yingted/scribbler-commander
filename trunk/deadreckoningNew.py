@@ -2,33 +2,33 @@ from util import *
 import time
 import threading
 import math
-DISTANCE_PER_COUNT = 0.000491426637992914#METERS
-ROBOT_DIAMETER = 0.142#Measurement in meters
+DISTANCE_PER_COUNT = 0.491426637992914#Millimeters
+ROBOT_DIAMETER = 148.5#Measurement in millimeters
 DEFAULT_DIGITS = 6
 PRINT_COORDINATES = False
-UPDATE_INTERVAL = 0.1#seconds
+UPDATE_INTERVAL = 0.1#Seconds
 runThread = True
 
-x_pos = 0.0#IN METERS
-y_pos = 0.0#IN METERS
+x_pos = 0.0#In millimeters
+y_pos = 0.0#In millimeters
 robotHeading = 0.0
 moveHistory = []
+beginTime = time.time()
 previousTime = time.time()
 
 #resets coordinates
 def reset_deadReckoning():
-    '''resets dead reckoning
-    motors must be stopped'''
     global x_pos, y_pos, robotHeading, moveHistory, previousTime
     x_pos = 0.0
     y_pos = 0.0
     robotHeading = 0.0
     moveHistory = []
+    beginTime = time.time()
     previousTime = time.time()
     get_encoders(False)
 
 #initializes dead reckoning odometry thread
-def i():#nitialize_deadReckoning
+def initialize_deadReckoning():
     global runThread
     reset_deadReckoning()
     runThread = True
@@ -53,8 +53,8 @@ def update():
     distanceLeft = float(encoders[0])*DISTANCE_PER_COUNT/2.0#gets distance travelled by left wheel
     distanceRight = float(encoders[1])*DISTANCE_PER_COUNT/2.0#gets distance travelled by right wheel
     delta_t=time.time()-previousTime
-    moveHistory.append([distanceLeft,distanceRight,delta_t])
-    state['wheel_speed']=distanceLeft/delta_t,distanceRight/delta_t
+    moveHistory.append([distanceLeft*0.001,distanceRight*0.001,delta_t])
+    state['wheel_speed']=distanceLeft*0.001/delta_t,distanceRight*0.001/delta_t
     cosCurrentAngle = math.cos(robotHeading)#cosine of current angle
     sinCurrentAngle = math.sin(robotHeading)#sine of current angle
     if(encoders[0]==encoders[1]):#if the distances are equal (robot is going straight)
@@ -66,6 +66,10 @@ def update():
         x_pos += distRatio * (math.cos(distDiff/ROBOT_DIAMETER+robotHeading)-cosCurrentAngle)#updates global coordinate x
         y_pos += distRatio * (math.sin(distDiff/ROBOT_DIAMETER+robotHeading)-sinCurrentAngle)#updates global coordinate y
         robotHeading += distDiff/ROBOT_DIAMETER#updates current robot heading
+    while robotHeading > math.pi:
+        robotHeading -= 2*math.pi
+    while robotHeading < -math.pi:
+        robotHeading += 2*math.pi
     state['where']=getX(),getY(),getHeading()
 
 def stopThread():
@@ -74,13 +78,13 @@ def stopThread():
 
 #gets coordinates
 def getCoords(numberOfDigits=DEFAULT_DIGITS):
-    print "(" + str(round(x_pos,numberOfDigits)) + "," + str(round(y_pos,numberOfDigits)) + " at angle "+str(round(robotHeading,numberOfDigits))+")"
+    print "(" + str(round(x_pos*0.001,numberOfDigits)) + "," + str(round(y_pos*0.001,numberOfDigits)) + " at angle "+str(round(robotHeading,numberOfDigits))+")"
 
 def getX():
-    return x_pos
+    return x_pos*0.001
 
 def getY():
-    return y_pos
+    return y_pos*0.001
 
 def getHeading():
     return robotHeading
