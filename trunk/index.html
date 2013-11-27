@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="UTF-8">
 		<title>commander</title>
-		<script src="/static/js/jquery-1.10.2.min.js"></script>
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 		<style>
 			#photo{
 				float:right;
@@ -40,19 +40,65 @@
 			</fieldset>
 			<fieldset>
 				<legend>map</legend>
-				<canvas id="map" width="400" height="400">
+				<canvas id="map" width="800" height="800">
 					cannot show map
 				</canvas>
 			</fieldset>
 		</form>
 		<script>
 			$(function(){
+				function fillCircle(gfx,pos,r,c){
+					var oldc = gfx.fillStyle;
+					gfx.fillStyle=c;
+					gfx.arc(pos[0],pos[1],r,0,2*Math.PI);
+					gfx.fill();
+					gfx.fillStyle = oldc;
+					gfx.beginPath();
+				}
 				function updateMap(position,pTrail,trail,obstacles){
+					var c=document.getElementById("map");
+					var gr=c.getContext("2d");
+					
+					console.log(1.23);
+					var cp = "#0000FF";
+					var pp = "#00AA00";
+					var fp = "#D07000";
+					var op = "#000000"; //don't change this colour
+					
 					//position=[x,y] in meters: position[0]=x, position[1]=y
 					//pTrail=[[left_arclength,right_arclength],...]
 					//trail=[[left_arclength,right_arclength],...]
 					//0<=obstacles[i][j]<=1
+					
+					pos=[400,400]
+					pTrail=[[429,429],[444,429],[460,481]]
+					trail=[[380,380]]
+					
+					obstacles=[[1,1,1,1],[0,0.5,0,1],[0.7,0.6,0.5,0.4],[0.1,0.2,0.4,0.8]]
+					
+					
+					var grid_width = 40; // must change
+					var grid_height = 40;// must change
+					for (var i=0;i< obstacles.length ;i++){ 
+						for (var j = 0; j < obstacles[i].length;j++){
+							fillCircle(gr, [j*grid_width, i*grid_height], 3, "#"+(255-(255*obstacles[i][j])).toString(16) + (255-(255*obstacles[i][j])).toString(16) + (255-(255*obstacles[i][j])).toString(16));
+						}
+					}
+					
+					for (var i=0;i<pTrail.length;i++){ 
+						fillCircle(gr,pTrail[i],1,pp);
+					}		
+					
+					for (var i=0;i<trail.length;i++){ 
+						fillCircle(gr,trail[i],1,fp);
+					}	
+					
+					fillCircle(gr,pos,2,cp);
+					
+					
+					
 				}
+				setInterval(function(){updateMap(null,null,null,null)},33);
 				(function update(){
 					$.post("/battery")
 						.done(function(data){
