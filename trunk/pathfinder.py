@@ -50,7 +50,7 @@ be restarted with a new target.
 newtarget = None
 
 start = util.state["where"][:2]
-finish = None
+finish = start
 
 # XXX all of these should probably be stored in state
 closedset = set([])
@@ -123,7 +123,7 @@ def pathfinderThread():
             newtarget = None
             iterastar = None
 
-definitely_obstacle = 0.85
+#definitely_obstacle = 0.85
 def neighbors(x,y=None):
     """
     Generates all neighbors of input location.
