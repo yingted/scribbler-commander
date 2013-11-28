@@ -148,10 +148,10 @@
 			</div>
 		</form>
 		<div id="map-container">
-			<img id="obstacles" height="100%">
 			<canvas id="map" width="800" height="800">
 				cannot show map
 			</canvas>
+			<img id="obstacles" height="100%">
 		</div>
 		<div id="photos">
 			<ul id="photo-list"></ul>
@@ -328,7 +328,7 @@
 						trail.push(data);
 					}).on("where trail",function(){
 						if(state.where)
-							updateMap(state.where,trail.reverse(),[]);
+							updateMap(state.where,trail.slice(0).reverse(),[]);
 					}).on("map_path",function(e,data){
 						$("#obstacles").attr("src",data);
 					});
