@@ -294,7 +294,9 @@ def initialize_pathfollower():
         global last_movestart, current_interval
         path = util.state["arclengths_ahead"]
         if not path:
-            motors(0,0)
+            if path is not None:
+                motors(0,0)
+            util.state["arclengths_ahead"] = None
             return
         if time() - last_movestart >= current_interval:
             # time to switch to next thing
