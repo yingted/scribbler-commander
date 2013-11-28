@@ -22,6 +22,7 @@
 				right:0;
 				top:0;
 				bottom:0;
+				z-index:-1;
 			}
 			#map-wrapper{
 				width:100%;
@@ -87,7 +88,7 @@
 				position:fixed;
 				overflow:hidden;
 			}
-				#photos{
+			#photos{
 				position:absolute;
 				right:0;
 				top:0;
@@ -102,7 +103,7 @@
 				list-style-type:none;
 			}
 			#search{
-			       background:#33CC33;
+				background:#33CC33;
 				width: 5em;
 				height:2em;
 				font-size:40px;
@@ -204,6 +205,7 @@
 					gr.save()
 					gr.translate(c.width/2,c.height/2);
 					gr.scale(100,100);//100 px/m
+					pos[1]*=-1;
 					
 					var gridres=100;
 					
@@ -218,8 +220,8 @@
 					//trail=[[left_arclength,right_arclength],...]
 					//0<=obstacles[i][j]<=1
 					
-					pos=[0,0,Math.PI*0.25];
-					pTrail=[[0.52,0.52],[0.52,0.33],[0.72,0.55],[0.55,0.72],[0.55,0.6],[0.52,0.52]];
+					//pos=[0,0,Math.PI*0.25];
+					//pTrail=[[0.52,0.52],[0.52,0.33],[0.72,0.55],[0.55,0.72],[0.55,0.6],[0.52,0.52]];
 					//trail=[[380,380]]
 					
 					var tx=0;
@@ -260,7 +262,12 @@
 							gr.moveTo(tx,ty);
 							gr.lineTo(x,y);
 						}
-						
+						else if(al+ar==0){
+							console.log(ar,r,ar/r);
+							t1=t2+ar/l;
+							tx=x;
+							ty=y;
+						}
 						else{
 							if (al>ar){
 								t1=((2*r*t2)+al-ar)/(2*r);
@@ -305,13 +312,13 @@
 						
 						gr.beginPath();
 						//gr.arc(tx,ty,r,0,2*Math.PI);
-						fillCircle(gr,[tx,ty],.05,pp);
-						gr.stroke();
-						
-						gr.beginPath();
+						//fillCircle(gr,[tx,ty],.05,pp);
+						//gr.stroke();
+						//
+						//gr.beginPath();
 						//gr.arc(x,y,r,0,2*Math.PI);
-						fillCircle(gr,[x,y],.05,pp);
-						gr.stroke();
+						//fillCircle(gr,[x,y],.05,pp);
+						//gr.stroke();
 						
 					}		
 					
@@ -324,7 +331,6 @@
 					
 					gr.restore();
 				}
-				updateMap(null,null,null);
 				(function update(){
 					$.post("/battery")
 						.done(function(battery){
@@ -351,7 +357,19 @@
 						});
 				});
 				function showPhoto(photo){
-					console.log(photo);
+					console.log("showing thumbnail",photo);
+					var transform="rotate("+(photo.theta-Math.PI/2)+"grad)";
+					$("<img>")
+						.addClass("thumb")
+						.attr("src",photo.path)
+						.css({
+							left:400+photo.x+"px",
+							top:400-photo.y+"px",
+							transform:transform,
+							MsTransform:transform,
+							WebkitTransform:transform,
+						})
+						.appendTo("#map-container");
 				}
 				var photos=[],state={},trail=[];
 				$(document)
@@ -367,7 +385,7 @@
 						trail.push(data);
 					}).on("where trail",function(){
 						if(state.where)
-							;//updateMap(state.where,trail.slice(0).reverse(),[]);
+							updateMap(state.where.slice(0),trail.slice(0).reverse(),[]);
 					}).on("map_path",function(e,data){
 						$("#obstacles").attr("src",data);
 					});
@@ -410,6 +428,8 @@
 								});
 							$.post("/history?key=trail&t="+data.t)
 								.done(function(prefix){
+									for(var i=0;i<prefix.length;++i)
+										prefix[i]=prefix[i][1];
 									trail=prefix.concat(trail);
 								});
 						}
@@ -419,7 +439,11 @@
 							state[a[i][0]]=a[i][1];
 							var e=$.Event(a[i][0]);
 							e.timeStamp=a[i][2]*1000;
-							$(document).trigger(e,[a[i][1]]);
+							//try{
+								$(document).trigger(e,[a[i][1]]);
+							//}catch(e){
+							//	console.error(e);
+							//}
 						}
 						subscribe();
 					});

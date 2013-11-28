@@ -37,9 +37,8 @@ def get_obstacle(emitters):
 	try:
 		robot.lock.acquire()
 		robot.ser.write(struct.pack('>BHB',157,400,emitters))
-		#return(robots.scribbler.read_2byte(robot.ser)+2**15)%2**16-2**15
-		val=(robots.scribbler.read_2byte(robot.ser)+2**15)%2**16-2**15
-		return val
+		robot.ser.flush()
+		return(robots.scribbler.read_2byte(robot.ser)+2**15)%2**16-2**15
 	finally:
 		robot.lock.release()
 def get_encoders(keep=True):
@@ -47,6 +46,7 @@ def get_encoders(keep=True):
 	try:
 		robot.lock.acquire()
 		robot.ser.write(struct.pack('BB',171,keep)+'\0'*7)
+		robot.ser.flush()
 		robot.ser.read(9)
 		return tuple(int((2**31-x)%2**32-2**31)for x in struct.unpack('>II',robot.ser.read(8)))
 	finally:
