@@ -179,7 +179,7 @@
 					gfx.beginPath();
 				
 				}
-				function updateMap(pos,pTrail,trail,obstacles){
+				function updateMap(pos,pTrail,trail){
 					var c=document.getElementById("map");
 					var gr=c.getContext("2d");
 					gr.save()
@@ -202,27 +202,6 @@
 					//pos=[400,400]
 					//pTrail=[[429,429],[444,429],[460,481]]
 					//trail=[[380,380]]
-					
-					//obstacles=[[1,1,1,1],[0,0.5,0,1],[0.7,0.6,0.5,0.4],[0.1,0.2,0.4,0.8]]
-					//obstacles = [];
-					//var gridSize=800/gridres|0;
-					//for (var i=0;i< gridSize; i++){
-					//	obstacles[i]=[];
-					//	for (var j=0;j<gridSize; j++){
-					//		obstacles[i][j]=Math.random();
-					//	
-					//	}
-					//
-					//}
-					//
-					//for (var i=0;i< obstacles.length ;i++){ 
-					//	for (var j = 0; j < obstacles[i].length;j++){
-					//		var hex=(255-(256*obstacles[i][j]|0)).toString(16);
-					//		while(hex.length<2)
-					//			hex="0"+hex;
-					//		fillTile(gr, [j*gridres, i*gridres], gridres, "#"+hex+hex+hex);
-					//	}
-					//}
 					
 					for (var i=0;i<pTrail.length;i++){ 
 						fillCircle(gr,pTrail[i],.03,pp);
