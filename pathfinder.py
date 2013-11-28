@@ -84,7 +84,7 @@ def pathfinderThread():
     global iterastar, pathpoints
     # stuff happens
     if newtarget != finish:
-        start = util.state["where"][0], util.state["where"][1]
+	    start = util.state["where"][:2]
         # we currently scrap partial paths, which might be useful, 
         # but that's okay.
         iterastar = resetAstar(start,newtarget)
