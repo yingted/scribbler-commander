@@ -32,8 +32,8 @@ def update_sensors():
 # - call set_target on a target point (grid coords -- not real coords)
 #   to set the target of the A*
 # - once A* finishes, the result path of coordinates is in 
-#	util.state["pathpoints"], and the result list of arlength pairs is in 
-#	util.state["arclengths_ahead"]
+#    util.state["pathpoints"], and the result list of arlength pairs is in 
+#    util.state["arclengths_ahead"]
 #
 # - TODO `cost` and `neighbors` do special things based on the map data -- 
 #   some integration still needs doing
@@ -72,10 +72,10 @@ def resetAstar(new_start, new_finish):
     util.state["pathpoints"] = []
     util.state["arclengths_ahead"] = []
     if new_finish is None or new_start is None:
-		start, finish = None, None
-		openset = [] # wipe
-		g_score = {} # wipe
-		f_score = {} # wipe
+        start, finish = None, None
+        openset = [] # wipe
+        g_score = {} # wipe
+        f_score = {} # wipe
         return None
     start, finish = new_start, new_finish
     openset = [(cost(start, finish), start)]
@@ -95,7 +95,7 @@ def cost((x1,y1),(x2,y2)):
     # XXX currently doesn't check edge cases (or even negative indices)
     
     return hypot(x1-x2,y1-y2)/(1-obstaclemap.p[x2][y2]) 
-#	ignores prior path length (that's what A* is for)
+#    ignores prior path length (that's what A* is for)
 #   gonna get ugly -- 
 #   scales equivalent distance up with probability of obstacle at target
 #   not quite it, will figure tomorrow :D
@@ -204,32 +204,32 @@ def trace_path(src, dest):
 
 
 def arclength_turn(theta):
-	"""
-	Returns a pair (left, right) describing how far forward each wheel 
-	must move to turn by angle theta CCW
-	"""
-	return (-theta*SCRIBBLER_RADIUS,theta*SCRIBBLER_RADIUS)
+    """
+    Returns a pair (left, right) describing how far forward each wheel 
+    must move to turn by angle theta CCW
+    """
+    return (-theta*SCRIBBLER_RADIUS,theta*SCRIBBLER_RADIUS)
 
 def path_to_arclengths(path):
-	"""
-	Returns a list of pairs, each describing the forward length of an arc 
-	traced by each side of the robot.
-	returns [(left_forward, right_forward),...]
-	"""
-	p = util.state["where"]
-	out = []
-	heading = p[2]
-	cur = p[:2]
-	for dest in path:
-		# turn to target
-		turnby = atan2(dest[0]-cur[0],dest[1]-cur[1])-heading
-		out.append(arclength_turn(turnby))
-		heading += turnby
-		# move to target
-		dist = hypot(dest[0]-cur[0], dest[1]-cur[1])
-		out.append((dist,dist))
-		cur = dest
-	return out
+    """
+    Returns a list of pairs, each describing the forward length of an arc 
+    traced by each side of the robot.
+    returns [(left_forward, right_forward),...]
+    """
+    p = util.state["where"]
+    out = []
+    heading = p[2]
+    cur = p[:2]
+    for dest in path:
+        # turn to target
+        turnby = atan2(dest[0]-cur[0],dest[1]-cur[1])-heading
+        out.append(arclength_turn(turnby))
+        heading += turnby
+        # move to target
+        dist = hypot(dest[0]-cur[0], dest[1]-cur[1])
+        out.append((dist,dist))
+        cur = dest
+    return out
 
 
 def findloops(graph):
