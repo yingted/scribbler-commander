@@ -1,5 +1,5 @@
 from pickle import load
-from numpy import arange, pi, exp, log, tan, arctan, linspace, around, ndarray, array, ones, mgrid, searchsorted, hypot, arctan2, abs
+from numpy import arange, pi, exp, log, tan, arctan, linspace, around, ndarray, array, ones, mgrid, searchsorted, hypot, arctan2, abs, isnan
 try:
     from scipy.integrate import quad
     from scipy.interpolate import UnivariateSpline
@@ -73,7 +73,11 @@ class Map(object):
 		self.P = P
 		self.w = w
 		self.h = h
-		self.x, self.y = mgrid[0:w, 0:h]
+		self.s = 8.
+		self.m_per_unit = self.s / 40.
+		endpoint = (self.s - self.m_per_unit) / 2
+		self.x = linspace(-endpoint, endpoint, num = w)
+		self.y = linspace(-endpoint, endpoint, num = h)
 		rho = .15
 		self.log_rho = log(rho)
 		self.lambd = .6
@@ -91,10 +95,13 @@ class Map(object):
 		x = self.x - x0
 		y = self.y - y0
 		radii = hypot(x, y)
-		thetas = arctan2(y, x) - theta0
+		thetas = (arctan2(y, x) - theta0 + pi) % (2 * pi) - pi
 		shape = radii.shape
-		#E = P_r(radii.flatten()).reshape(shape)
-		E = array([P_r(radius) for radius in radii.flatten()]).reshape(shape)
+		radii = radii.clip(0, self.P._max_r)
+		E = P_r(radii.flatten().clip(0, self.P._max_r)).reshape(shape)
+		#E = array([P_r(radius) for radius in radii.flatten()]).reshape(shape)
+		if isnan(E.sum()):
+			E = ones(shape) / E.size#XXX salvage values
 		self.d += exp(self.P.theta(thetas.flatten()).reshape(shape)) * (E - H)
 		#print v, self.d
 	@property
