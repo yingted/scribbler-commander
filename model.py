@@ -93,7 +93,8 @@ class Map(object):
 		radii = hypot(x, y)
 		thetas = arctan2(y, x) - theta0
 		shape = radii.shape
-		E = P_r(radii.flatten()).reshape(shape)
+		#E = P_r(radii.flatten()).reshape(shape)
+		E = array([P_r(radius) for radius in radii.flatten()]).reshape(shape)
 		self.d += exp(self.P.theta(thetas.flatten()).reshape(shape)) * (E - H)
 		#print v, self.d
 	@property

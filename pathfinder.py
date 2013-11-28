@@ -13,20 +13,6 @@ from scipy.misc import toimage
 
 obstaclemap = Map(Prior(), 40, 40) # XXX dimensions and initial P (currently grid points every 10 cm)
 irps = [cycle((125, 131, 137, 143, 146))]
-@util.every(.3)
-def update_sensors():
-    irp = None
-    while irp is None:
-        try:
-            irp = irps[-1].next()
-        except StopIteration:
-            irps.pop()
-    x, y, theta = util.state['where']
-    setIRPower(irp)#XXX thread safety
-    obstaclemap.update(x, y, theta, irp, util.get_obstacle('center'))
-    out = StringIO()
-    toimage(obstaclemap.d).save(out, format='png')
-    util.state['map_path'] = 'data:image/png;base64,' + out.getvalue().encode('base64').replace('\n', '')
 
 # NOTES:
 # - call set_target on a target point (grid coords -- not real coords)
@@ -53,8 +39,8 @@ def set_target(xy):
     global newtarget
     newtarget = xy
 
-start = util.state["where"][:2]
-finish = start
+start = None
+finish = None
 
 # XXX all of these should probably be stored in state
 closedset = set([])
@@ -100,14 +86,18 @@ def cost((x1,y1),(x2,y2)):
 #   scales equivalent distance up with probability of obstacle at target
 #   not quite it, will figure tomorrow :D
 
-openset = [(cost(start, finish), start)]
-f_score = {start:cost(start,finish)} # estimated total cost to target
+openset = None
+f_score = None
 
 # XXX global pathpoints for debugging
 #pathpoints = []
 iterastar = None
 
 def initialize_pathfinder():
+    global start, finish, openset, f_score
+    start = finish = util.state["where"][:2]
+    openset = [(cost(start, finish), start)]
+    f_score = {start:cost(start,finish)} # estimated total cost to target
     @util.every(50) # has to be turned back into threaded
     def pathfinderThread():
         """The thread that continually waits on target change and 
@@ -130,6 +120,20 @@ def initialize_pathfinder():
                 util.state["arclengths_ahead"] = path_to_arclengths(trace)
                 newtarget = None
                 iterastar = None
+    @util.every(.3)
+    def update_sensors():
+        irp = None
+        while irp is None:
+            try:
+                irp = irps[-1].next()
+            except StopIteration:
+                irps.pop()
+        x, y, theta = util.state['where']
+        setIRPower(irp)#XXX thread safety
+        obstaclemap.update(x, y, theta, irp, util.get_obstacle('center'))
+        out = StringIO()
+        toimage(1 - obstaclemap.p).save(out, format='png')
+        util.state['map_path'] = 'data:image/png;base64,' + out.getvalue().encode('base64').replace('\n', '')
 
 #definitely_obstacle = 0.85
 def neighbors(x,y=None):
