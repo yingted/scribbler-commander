@@ -44,9 +44,9 @@ def deadReckoningThread():
     global previousTime, lastMove
     while runThread:
         update()
-        lastMove += 1
-        if(len(moveHistory)>SPEED_CHANGE_SENSITIVITY and not withinError(getAverageSpeedSinceLastChange(SPEED_CHANGE_SENSITIVITY),getRecentAverageSpeed(SPEED_CHANGE_SENSITIVITY))):
-            lastMove = 0
+        #lastMove += 1
+        #if(len(moveHistory)>SPEED_CHANGE_SENSITIVITY and not withinError(getAverageSpeedSinceLastChange(SPEED_CHANGE_SENSITIVITY),getRecentAverageSpeed(SPEED_CHANGE_SENSITIVITY))):
+            #lastMove = 0
         previousTime = time.time()
         if(PRINT_COORDINATES):
             getCoords(DEFAULT_DIGITS)
