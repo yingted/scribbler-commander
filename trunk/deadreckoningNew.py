@@ -149,7 +149,7 @@ def getRecentAverageSpeed(numberOfMoves):
 def getMoveExpected(time):
     pass#to be edited
 
-def a(arcLengthLeft,arcLengthRight):#rcLengthToSpeedTime
+def arcLengthToSpeedTime(arcLengthLeft,arcLengthRight):
     if(math.fabs(arcLengthRight-arcLengthLeft)<0.00001):
         countsLeft = COUNTS_PER_METER*arcLengthLeft
         countsRight = COUNTS_PER_METER*arcLengthRight
