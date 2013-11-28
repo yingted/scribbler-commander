@@ -152,7 +152,9 @@ def connect_async(cb=None):
 		state['connected'] = False
 		xp_initialize()
 		import deadreckoningNew as deadreckoning
+		import pathfinder
 		deadreckoning.initialize_deadReckoning()
+		pathfinder.initialize_pathfinder()
 	state['connected'] = True
 	if cb is not None:
 		cb()

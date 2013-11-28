@@ -2,13 +2,14 @@
 import numpy # currently unused, should be used for optimization
 from math import hypot, atan2, pi
 from heapq import heappush, heappop
-#import threading # might not be necessary if thread not started here
 import util # needed for state object
 from time import sleep
 from model import Map,Prior
 from movement import SCRIBBLER_RADIUS
 from itertools import *
 from cStringIO import StringIO
+from myro import setIRPower
+from scipy.misc import toimage
 
 obstaclemap = Map(Prior(), 40, 40) # XXX dimensions and initial P (currently grid points every 10 cm)
 irps = [cycle((125, 131, 137, 143, 146))]
@@ -17,13 +18,14 @@ def update_sensors():
     irp = None
     while irp is None:
         try:
-            irp = next(irps[-1])
+            irp = irps[-1].next()
         except StopIteration:
             irps.pop()
+    x, y, theta = util.state['where']
     setIRPower(irp)#XXX thread safety
-    obstaclemap.update(x, y, theta, irp, get_obstacle('center'))
+    obstaclemap.update(x, y, theta, irp, util.get_obstacle('center'))
     out = StringIO()
-    scipy.misc.toimage(obstaclemap.d).save(out, format='png')
+    toimage(obstaclemap.d).save(out, format='png')
     util.state['map_path'] = 'data:image/png;base64,' + out.getvalue().encode('base64').replace('\n', '')
 def set_target(xy):
     '''sets the target to x, y
@@ -100,6 +102,7 @@ f_score = {start:cost(start,finish)} # estimated total cost to target
 #pathpoints = []
 iterastar = None
 
+<<<<<<< HEAD
 @util.every(50) # has to be turned back into threaded
 def pathfinderThread():
     """The thread that continually waits on target change and 
@@ -122,6 +125,29 @@ def pathfinderThread():
             util.state["arclengths ahead"] = path_to_arclengths(trace)
             newtarget = None
             iterastar = None
+=======
+def initialize_pathfinder():
+    @util.every(50) # has to be turned back into threaded
+    def pathfinderThread():
+        """The thread that continually waits on target change and 
+        runs A* whenever a new target is set"""
+        global iterastar, pathpoints
+        # stuff happens
+        if newtarget != finish:
+            start = util.state["where"][:2]
+            # we currently scrap partial paths, which might be useful, 
+            # but that's okay.
+            iterastar = resetAstar(start,newtarget)
+        if newtarget != None and iterastar != None:
+            try:
+                # step once thru A*
+                iterastar()
+            except StopIteration:
+                # A* finished, so we update state
+                util.state["pathpoints"] = trace_path(start, finish)
+                newtarget = None
+                iterastar = None
+>>>>>>> pathfinder integration
 
 #definitely_obstacle = 0.85
 def neighbors(x,y=None):

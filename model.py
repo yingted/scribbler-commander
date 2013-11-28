@@ -1,5 +1,5 @@
 from pickle import load
-from numpy import arange, pi, exp, log, tan, arctan, linspace, around, ndarray, array, ones, mgrid
+from numpy import arange, pi, exp, log, tan, arctan, linspace, around, ndarray, array, ones, mgrid, searchsorted, hypot, arctan2, abs
 try:
     from scipy.integrate import quad
     from scipy.interpolate import UnivariateSpline
@@ -50,7 +50,7 @@ class Prior(object):
 		sigma1 = data['sigma'][i]
 		sigma2 = data['sigma'][i+1]
 		mu = dt * mu2 + (1 - dt) * mu1
-		sigma = dt * sigma2 + (1 - dt) * sigma1
+		sigma = abs(dt * sigma2 + (1 - dt) * sigma1)
 
 		return ((v - mu)/sigma)**2 / -2 - log((2 * pi)**.5 * sigma)
 	@memoize #XXX check memory usage
@@ -66,7 +66,7 @@ class Prior(object):
 		return self.v_r(irp, v, r) + self.r(irp, r)
 	def theta(self, theta):
 		'''log of distribution P(theta) in radians'''
-		return -(theta**2/P._var_theta-log(2*pi*P._var_theta))/2
+		return -(theta**2/self._var_theta-log(2 * pi * self._var_theta))/2
 class Map(object):
 	def __init__(self, P, w, h):
 		'''construct a grid map'''
@@ -76,7 +76,7 @@ class Map(object):
 		self.x, self.y = mgrid[0:w, 0:h]
 		rho = .15
 		self.log_rho = log(rho)
-		lambd = .6
+		self.lambd = .6
 		self.d = ones((w, h)) * self.log_rho#log-probabilities
 		self.R = tan(linspace(0, arctan(P._max_r / P._h), num=3 * P._N+1)) * P._h
 	def update(self, x0, y0, theta0, irp, v):
@@ -84,16 +84,17 @@ class Map(object):
 		x0, y0, theta0 are standard mathematics x, y, theta
 		returns probabilities at self.x and self.y or None on failure'''
 		self.d = (self.d - self.log_rho) * self.lambd + self.log_rho
-		H = P.v(irp, v)
+		H = self.P.v(irp, v)
 		# use P_r(r) as a cached for P(irp, v, r) 
-		P_r = UnivariateSpline(self.R, array([P(irp, v, r) for r in self.R]))
+		P_r = UnivariateSpline(self.R, array([self.P(irp, v, r) for r in self.R]))
 		# calculate radii, set of radii and thetas
 		x = self.x - x0
 		y = self.y - y0
 		radii = hypot(x, y)
 		thetas = arctan2(y, x) - theta0
-		E = P_r(radii)
-		self.d += exp(P.theta(thetas)) * (E - H)
+		shape = radii.shape
+		E = P_r(radii.flatten()).reshape(shape)
+		self.d += exp(self.P.theta(thetas.flatten()).reshape(shape)) * (E - H)
 		#print v, self.d
 	@property
 	def p(self):
