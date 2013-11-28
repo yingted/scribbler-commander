@@ -75,7 +75,7 @@ class ScribblerCommander(object):
 		except AttributeError:
 			raise cherrypy.HTTPError(503, 'Service Unavailable')
 	@ajax#XXX handle non-ajax
-	@util.every(10)
+	#@util.every(10)#XXX debug
 	def photo(self=None):
 		try:
 			deltas_change.acquire()
