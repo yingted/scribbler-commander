@@ -139,7 +139,7 @@ def initialize_pathfinder():
         obstaclemap.update(x, y, theta, irp, util.get_obstacle('center'))
         if show.next():
             out = StringIO()
-            data = 255 - (255 * obstaclemap.p[::-1]).astype('uint8')
+            data = 255 - (255 * obstaclemap._p[::-1]).astype('uint8')
             toimage(data).save(out, format='png')
             util.state['map_path'] = 'data:image/png;base64,' + out.getvalue().encode('base64').replace('\n', '')
 
