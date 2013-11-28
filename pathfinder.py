@@ -19,8 +19,7 @@ def set_target(xy):
 #   to set the target of the A*
 #
 # - `cost` and `neighbors` do special things based on the map data -- 
-#   that stuff still needs integration, currently each function is a 
-#   dummy for a blank, infinitely large 8-connected square grid
+#   some integration still needs doing
 #
 
 """
@@ -31,8 +30,8 @@ be restarted with a new target.
 """
 newtarget = None
 
-start = (0,0) # XXX Must get from state
-finish = (10,10) # XXX Must get from state
+start = util.state["where"][0],util.state["where"][1]
+finish = None
 
 # XXX all of these should probably be stored in state
 closedset = set([])
@@ -48,7 +47,7 @@ def resetAstar(new_start, new_finish):
         return None
     global start, finish, openset, closedset, camefrom, g_score, f_score
     start, finish = new_start, new_finish
-    openset = heapify([(cost(start, finish), start)])
+    openset = [(cost(start, finish), start)]
     closedset = set([])
     camefrom = {}
     util.state["pathpoints"] = []
@@ -75,7 +74,6 @@ def cost((x1,y1),(x2,y2)):
 openset = [(cost(start, finish), start)]
 f_score = {start:cost(start,finish)} # estimated total cost to target
 
-
 # XXX global pathpoints for debugging
 pathpoints = []
 iterastar = None
@@ -86,7 +84,7 @@ def pathfinderThread():
     global iterastar, pathpoints
     # stuff happens
     if newtarget != finish:
-        start = (0,0) #util.state["where"][0], util.state["where"][1]
+        start = util.state["where"][0], util.state["where"][1]
         # we currently scrap partial paths, which might be useful, 
         # but that's okay.
         iterastar = resetAstar(start,newtarget)
@@ -98,6 +96,7 @@ def pathfinderThread():
             # A* finished, so we update state
             util.state["pathpoints"] = trace_path(start, finish)
             newtarget = None
+            iterastar = None
 
 
 def neighbors(x,y=None):
