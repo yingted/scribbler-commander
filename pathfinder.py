@@ -27,10 +27,6 @@ def update_sensors():
     out = StringIO()
     toimage(obstaclemap.d).save(out, format='png')
     util.state['map_path'] = 'data:image/png;base64,' + out.getvalue().encode('base64').replace('\n', '')
-def set_target(xy):
-    '''sets the target to x, y
-    returns immediately'''
-    newtarget = xy
 
 # NOTES:
 # - call set_target on a target point (grid coords -- not real coords)
@@ -50,6 +46,12 @@ and is not equal to finish when the A* has to
 be restarted with a new target.
 """
 newtarget = None
+
+def set_target(xy):
+    '''sets the target to x, y
+    returns immediately'''
+    global newtarget
+    newtarget = xy
 
 start = util.state["where"][:2]
 finish = start
