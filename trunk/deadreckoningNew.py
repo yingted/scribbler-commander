@@ -31,6 +31,7 @@ def reset_deadReckoning():
 
 #initializes dead reckoning odometry thread
 def initialize_deadReckoning():
+    '''initializes dead reckoning odometry thread'''    
     global runThread
     reset_deadReckoning()
     runThread = True
@@ -39,6 +40,7 @@ def initialize_deadReckoning():
 
 #dead reckoning thread
 def deadReckoningThread():
+    '''dead reckoning odometry thread'''
     global previousTime, lastMove
     while runThread:
         update()
@@ -48,8 +50,7 @@ def deadReckoningThread():
         previousTime = time.time()
         if(PRINT_COORDINATES):
             getCoords(DEFAULT_DIGITS)
-        while time.time()<previousTime+UPDATE_INTERVAL:
-            pass
+        time.sleep(UPDATE_INTERVAL-time.time()+previousTime)
 
 #updates the position
 def update():
@@ -132,7 +133,7 @@ def arcLengthToTime(arcLength):#Will use a constant motor value of 1 for now
     pass#to be edited
 
 def getMoveHistory(begin=0,end=None):#returns in reverse chronological order, end is exclusive
-    '''returns list of (left_arclength,right_arclength)'''
+    '''returns list of (left_arclength,right_arclength) in reverse chronological order'''
     output = []
     if end is None:
         end=len(moveHistory)
