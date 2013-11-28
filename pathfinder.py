@@ -72,7 +72,7 @@ def resetAstar(new_start, new_finish):
     closedset = set([])
     camefrom = {}
     util.state["pathpoints"] = []
-    util.state["arclengths ahead"] = []
+    util.state["arclengths_ahead"] = []
     if new_finish is None or new_start is None:
         return None
     openset = [(cost(start, finish), start)]
@@ -124,7 +124,7 @@ def initialize_pathfinder():
                 # A* finished, so we update state
                 trace = trace_path(start, finish)
                 util.state["pathpoints"] = trace
-                util.state["arclengths ahead"] = path_to_arclengths(trace)
+                util.state["arclengths_ahead"] = path_to_arclengths(trace)
                 newtarget = None
                 iterastar = None
 
