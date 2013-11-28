@@ -66,7 +66,6 @@ def resetAstar(new_start, new_finish):
     Reset the A* search space to do a search from given start position 
     to given end position, return the generator object
     """
-    
     global start, finish, openset, closedset, camefrom, g_score, f_score
     closedset = set([])
     camefrom = {}
@@ -113,7 +112,7 @@ def initialize_pathfinder():
     def pathfinderThread():
         """The thread that continually waits on target change and 
         runs A* whenever a new target is set"""
-        global iterastar, pathpoints
+        global iterastar, pathpoints, newtarget
         # stuff happens
         if newtarget != finish:
             start = util.state["where"][:2]
