@@ -102,7 +102,7 @@ class Map(object):
 		y = self._y - y0
 		radii = hypot(x, y) - self.r0
 		thetas = (arctan2(y, x) - theta0 + pi) % (2 * pi) - pi
-		H = self.P.v(irp, v)
+		H = self.P.v(irp, v) - .15
 		shape = radii.shape
 		E = nan_to_num(log(array([prob(x) for x in radii.flatten()]).clip(0, 1))).reshape(shape)
 		if isnan(E.sum()):

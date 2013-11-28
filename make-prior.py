@@ -42,6 +42,8 @@ if __name__=="__main__":
 				mu[i]+=.5*left*w
 				mu[i+1]+=.5*right*w
 			mu/=counts
+			mu[0]=mu[1]#XXX hack
+			sigma[0]=sigma[1]#XXX hack
 			data[ent['irp']]={
 				'mu':map(float,mu),
 				'sigma':map(float,sigma),
