@@ -225,9 +225,13 @@
 							setTimeout(update,10000);
 						});
 				})();
-				$("form [name=do],map[name=move] area[name]").click(function(e){
+				$("form [name=do]").click(function(e){
 					e.preventDefault();
 					$.post("/"+$(this).val());
+				});
+				$("map[name=move] area[name]").click(function(e){
+					e.preventDefault();
+					$.post("/"+$(this).attr("name"));
 				});
 				$("form [name=go]").click(function(e){
 					e.preventDefault();
