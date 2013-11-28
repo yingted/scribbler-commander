@@ -10,6 +10,10 @@ from itertools import *
 from cStringIO import StringIO
 from myro import setIRPower
 from scipy.misc import toimage
+from deadreckoningNew import arcLengthToSpeedTime as al2st
+from time import time
+from collections import deque
+from myro import motors # is motors here?
 
 obstaclemap = Map(Prior(), 40, 40) # XXX dimensions and initial P (currently grid points every 10 cm)
 irps = [cycle((128, 134, 140, 146, 153))]
@@ -109,7 +113,7 @@ def initialize_pathfinder():
             # we currently scrap partial paths, which might be useful, 
             # but that's okay.
             iterastar = resetAstar(start,newtarget)
-        if newtarget != None and iterastar != None:
+        else if newtarget != None and iterastar != None:
             try:
                 # step once thru A*
                 iterastar()
@@ -208,7 +212,10 @@ def trace_path(src, dest):
         #print cur
         path.append(cur)
         cur = camefrom[cur]
-    return [(obstaclemap.x[i[0]], obstaclemap.y[i[1]]) for i in reversed(path)]
+    out = deque([])
+    for i in reversed(path):
+		out.append((obstaclemap.x[i[0]], obstaclemap.y[i[1]]) )
+	return out
 
 
 def arclength_turn(theta):
@@ -225,7 +232,7 @@ def path_to_arclengths(path):
     returns [(left_forward, right_forward),...]
     """
     p = util.state["where"]
-    out = []
+    out = deque([])
     heading = p[2]
     cur = p[:2]
     for dest in path:
@@ -269,6 +276,36 @@ print "###"
 print "####"
 findloops(camefrom)
 """
+
+# DRIVING WOOP
+last_movestart = time()
+current_interval = 0
+def initialize_pathfollower():
+	global last_time, current_interval
+	last_movestart = time()
+	current_interval = 0
+	@util.every(50)
+	def followPathThread():
+		path = util.state["arclengths_ahead"]
+		if not path:
+			motors(0,0)
+			return
+		global last_movestart, current_interval
+		if time() - last_movestart >= current_interval:
+			# time to switch to next thing
+			move = al2st(*path.popleft())
+			util.state["arclengths_ahead"] = path
+			last_movestart = time()
+			current_interval = move[2]
+			motors(move[0],move[1])
+		
+		
+	
+	
+
+def cancel_pathfollower():
+	resetAstar(None, None)
+
 
 if __name__ == "__main__":
     set_target((30,30))

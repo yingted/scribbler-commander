@@ -12,6 +12,7 @@ import bisect
 import numpy
 import datetime
 import deadreckoningNew as deadreckoning
+from pathfinder import cancel_pathfollower as killpath
 util.connect_async()
 def ajax(handler):
 	return cherrypy.expose(cherrypy.tools.allow(methods=('POST',))(cherrypy.tools.json_out()(handler)))
@@ -55,18 +56,23 @@ class ScribblerCommander(object):
 		raise cherrypy.HTTPRedirect('/')
 	@ajax
 	def forward(self):
+		killpath()
 		myro.forward(1)
 	@ajax
 	def backward(self):
+		killpath()
 		myro.backward(1)
 	@ajax
 	def left(self):
+		killpath()
 		myro.turn(1)
 	@ajax
 	def right(self):
+		killpath()
 		myro.turn(-1)
 	@ajax
 	def stop(self):
+		killpath()
 		myro.stop()
 	@ajax
 	def battery(self):
