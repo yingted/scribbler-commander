@@ -135,10 +135,10 @@
 				display:none;
 			}
 			#viewer{
-				/*display:none;*/
+				display:none;
 				position:fixed;
-				top:50%;
-				left:40%;
+				top:60%;
+				left:45%;
 				height:480px;
 				width:640px;
 				margin-left:-240px;
@@ -149,7 +149,7 @@
 		</style>
 	</head>
 	<body class="disconnected">
-		<img id="viewer" href="#" src="http://localhost:8080/photos/2013-11-28T08:14:51.503471.jpg">
+		<img id="viewer" href="#" title="click to close">
 		<form method="post">
 			<img id="arrows" usemap="#move" src="static/css/MoveArrows.png" alt="Move Arrows">
 			<map name="move">
@@ -391,7 +391,10 @@
 				});
 				function photoItem(photo){
 					var $elt=$("#templates>.photo-item").clone().prependTo("#photo-list");
-					$elt.find("a").attr("href",photo.path).find("img").attr("src",photo.path);
+					$elt.find("a").click(function(e){
+						e.preventDefault();
+						$("#viewer").attr("src",photo.path).show("fast");
+					}).find("img").attr("src",photo.path);
 					return $elt;
 				}
 				$("#viewer").click(function(){
