@@ -457,6 +457,9 @@
 							;//updateMap(state.where.slice(0),trail.slice(0).reverse(),[]);
 					}).on("map_path",function(e,data){
 						$("#obstacles").attr("src",data);
+					}).keyup(function(e){
+						if(e.which==32)
+							$.post("/photo");
 					});
 				$("#map").click(function(e){
 					var pageX=e.clientX+document.body.scrollLeft,pageY=e.clientY+document.body.scrollTop,ofs=$(this).offset();

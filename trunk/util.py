@@ -114,6 +114,8 @@ class State(shelve.DbfilenameShelf):
 	def history(self, key):
 		'''returns the history of the values of the key
 		the return value should not be changed'''
+		if not isinstance(key, basestring):
+			raise KeyError(key)
 		return shelve.DbfilenameShelf.__getitem__(self, key)
 	def age(self, key):
 		'''returns how long ago the key was set'''

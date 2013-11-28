@@ -16,7 +16,7 @@ from collections import deque
 from myro import motors # is motors here?
 
 obstaclemap = Map(Prior(), 40, 40) # XXX dimensions and initial P (currently grid points every 10 cm)
-irps = [cycle((128, 134, 140, 146, 153))]
+irps = [cycle((128, 134, 140, 146, 153)), cycle((134, 140, 146))]
 
 # NOTES:
 # - call set_target on a target point (grid coords -- not real coords)
@@ -129,7 +129,7 @@ def initialize_pathfinder():
                 newtarget = None
                 iterastar = None
         else: sleep(7.5)
-    show = cycle([True]+[False]*4)
+    show = cycle([True]+[False]*0)
     @util.every(.1)
     def update_sensors():
         irp = None
