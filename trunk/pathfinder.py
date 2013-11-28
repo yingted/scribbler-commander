@@ -98,7 +98,7 @@ def initialize_pathfinder():
     start = finish = util.state["where"][:2]
     openset = [(cost(start, finish), start)]
     f_score = {start:cost(start,finish)} # estimated total cost to target
-    @util.every(50) # has to be turned back into threaded
+    @util.every(10)
     def pathfinderThread():
         """The thread that continually waits on target change and 
         runs A* whenever a new target is set"""
@@ -120,6 +120,7 @@ def initialize_pathfinder():
                 util.state["arclengths_ahead"] = path_to_arclengths(trace)
                 newtarget = None
                 iterastar = None
+        else: sleep(75)
     show = cycle([True]+[False]*4)
     @util.every(.3)
     def update_sensors():
