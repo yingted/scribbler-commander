@@ -11,9 +11,10 @@ import simplejson as json
 import bisect
 import numpy
 import datetime
-import deadreckoningNew as deadreckoning
-from pathfinder import cancel_pathfollower as killpath
 util.connect_async()
+import deadreckoningNew as deadreckoning
+import pathfinder
+from pathfinder import cancel_pathfollower as killpath
 def ajax(handler):
 	return cherrypy.expose(cherrypy.tools.allow(methods=('POST',))(cherrypy.tools.json_out()(handler)))
 deltas = []

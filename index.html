@@ -195,6 +195,7 @@
 		</div>
 		<script>
 			$(function(){
+				var px_per_m=100;
 				function fillCircle(gfx,pos,r,c){
 					var oldc = gfx.fillStyle;
 					gfx.fillStyle=c;
@@ -224,7 +225,7 @@
 
 					gr.save()
 					gr.translate(c.width/2,c.height/2);
-					gr.scale(100,100);//100 px/m
+					gr.scale(px_per_m,px_per_m);//100 px/m
 					pos[1]*=-1;
 					
 					var gridres=100;
@@ -432,6 +433,11 @@
 					}).on("map_path",function(e,data){
 						$("#obstacles").attr("src",data);
 					});
+				$("#map").click(function(e){
+					var pageX=e.clientX+document.body.scrollLeft,pageY=e.clientY+document.body.scrollTop,ofs=$(this).offset();
+					e.preventDefault();
+					$.post("/set_target?x="+(pageX-ofs.left-400)/px_per_m+"&y="+(400-(pageY-ofs.top))/px_per_m);
+				});
 				var params="";
 				(function subscribe(){
 					$.ajax({
@@ -465,7 +471,7 @@
 									$(photos.reverse()).map(function(i,e){
 										var $elt=$("#templates>.photo-item").clone();
 										$elt.find("img").attr("src",e[1].path);
-										showPicture(e[1]);
+										showPhoto(e[1]);
 										return $elt[0];
 									}).appendTo("#photo-list");
 								});
