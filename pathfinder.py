@@ -33,7 +33,7 @@ def update_sensors():
 #   to set the target of the A*
 # - once A* finishes, the result path of coordinates is in 
 #	util.state["pathpoints"], and the result list of arlength pairs is in 
-#	util.state["arclengths ahead"]
+#	util.state["arclengths_ahead"]
 #
 # - TODO `cost` and `neighbors` do special things based on the map data -- 
 #   some integration still needs doing
@@ -68,13 +68,17 @@ def resetAstar(new_start, new_finish):
     """
     
     global start, finish, openset, closedset, camefrom, g_score, f_score
-    start, finish = new_start, new_finish
     closedset = set([])
     camefrom = {}
     util.state["pathpoints"] = []
     util.state["arclengths_ahead"] = []
     if new_finish is None or new_start is None:
+		start, finish = None, None
+		openset = [] # wipe
+		g_score = {} # wipe
+		f_score = {} # wipe
         return None
+    start, finish = new_start, new_finish
     openset = [(cost(start, finish), start)]
     g_score = {start:0} # best known cost from start
     f_score = {start:cost(start,finish)} # estimated total cost to target
