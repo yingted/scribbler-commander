@@ -20,7 +20,7 @@ lastMove = 0#number of update intervals ago
 
 #resets coordinates
 def reset_deadReckoning():
-    global x_pos, y_pos, robotHeading, moveHistory, previousTime
+    global x_pos, y_pos, robotHeading, moveHistory, beginTime, previousTime
     x_pos = 0.0
     y_pos = 0.0
     robotHeading = 0.0
