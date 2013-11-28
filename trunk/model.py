@@ -91,8 +91,9 @@ class Map(object):
 		#self.d[~isfinite(self.d)] = self.log_rho
 		self.d *= self.lambd
 		# use P_r(r) as a cached for P(irp, v, r) 
-		P_r = UnivariateSpline(self.R, array([self.P(irp, v, r) for r in self.R]))
-		factor = exp(P_r(self.R))
+		P_r = UnivariateSpline(self.R, exp(array([self.P(irp, v, r) for r in self.R])))
+		def prob(r):
+			return P_r(r) / P_r.integral(0, r)
 		# calculate radii, set of radii and thetas
 		x = self._x - x0
 		y = self._y - y0
@@ -100,9 +101,9 @@ class Map(object):
 		thetas = (arctan2(y, x) - theta0 + pi) % (2 * pi) - pi
 		H = self.P.v(irp, v)
 		shape = radii.shape
-		E = nan_to_num(P_r(radii.flatten())).reshape(shape)
+		E = nan_to_num(log(array([prob(x) for x in radii.flatten()]).clip(0, 1))).reshape(shape)
 		if isnan(E.sum()):
-			E = ones(shape) / E.size#XXX salvage values
+			E = zeros(shape)#XXX salvage values
 		k = 20.
 		#print E - H
 		self.d += exp(self.P.theta(thetas.flatten()).reshape(shape)) * (E - H).clip(-k, k) * (radii <= self.P._max_r)
@@ -152,7 +153,7 @@ if __name__=='__main__':
 	#print [P(134, 1000, (i+.5)/5.*.3+.2) for i in xrange(5)]
 	xp_initialize()
 	#irps = [125, 131, 137, 143, 146]
-	irps = [128]#, 131, 137, 143, 146]
+	irps = [128, 134, 141, 147, 153]
 	hist = []
 	def distances():
 		rho = .15
