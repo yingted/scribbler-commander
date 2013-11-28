@@ -120,7 +120,7 @@ def initialize_pathfinder():
                 util.state["arclengths_ahead"] = path_to_arclengths(trace)
                 newtarget = None
                 iterastar = None
-    @util.every(.3)
+    @util.every(.1)
     def update_sensors():
         irp = None
         while irp is None:
@@ -132,7 +132,8 @@ def initialize_pathfinder():
         setIRPower(irp)#XXX thread safety
         obstaclemap.update(x, y, theta, irp, util.get_obstacle('center'))
         out = StringIO()
-        toimage(255 - (255 * obstaclemap.p).astype('uint8')).save(out, format='png')
+	data = 255 - (255 * obstaclemap.p[::-1]).astype('uint8')
+	toimage(data).save(out, format='png')
         util.state['map_path'] = 'data:image/png;base64,' + out.getvalue().encode('base64').replace('\n', '')
 
 #definitely_obstacle = 0.85

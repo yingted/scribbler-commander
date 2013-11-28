@@ -1,5 +1,5 @@
 from pickle import load
-from numpy import arange, pi, exp, log, tan, arctan, linspace, around, ndarray, array, ones, mgrid, searchsorted, hypot, arctan2, abs, isnan, isfinite
+from numpy import arange, pi, exp, log, tan, arctan, linspace, around, ndarray, array, ones, meshgrid, searchsorted, hypot, arctan2, abs, isnan, isfinite
 try:
     from scipy.integrate import quad
     from scipy.interpolate import UnivariateSpline
@@ -76,13 +76,12 @@ class Map(object):
 		self.s = 8.
 		self.m_per_unit = self.s / 40.
 		endpoint = (self.s - self.m_per_unit) / 2
-		self.x = linspace(-endpoint, endpoint, num = w)
-		self.y = linspace(-endpoint, endpoint, num = h)
+		self.x, self.y = meshgrid(linspace(-endpoint, endpoint, num = w), linspace(-endpoint, endpoint, num = h))
 		rho = .15
 		self.log_rho = log(rho)
 		self.lambd = .6
 		self.d = ones((w, h)) * self.log_rho#log-probabilities
-		self.R = tan(linspace(0, arctan(P._max_r / P._h), num=3 * P._N+1)) * P._h
+		self.R = tan(linspace(0, arctan(P._max_r / P._h), num=3 * P._N + 1)) * P._h
 	def update(self, x0, y0, theta0, irp, v):
 		'''update the map using sensor data
 		x0, y0, theta0 are standard mathematics x, y, theta
@@ -110,12 +109,11 @@ class Map(object):
 	@property
 	def p(self):
 		'''returns non-log probabilities'''
-		print"Z=",exp(self.d).sum(), exp(self.d)
 		return exp(self.d)
 if __name__=='__main__':
 	from myro import *
 	from numpy import array, set_printoptions, dot
-	from matplotlib.pyplot import *
+	#from matplotlib.pyplot import *
 	from movement import moveforward, turnside
 	from time import time
 	import deadreckoning

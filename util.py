@@ -37,7 +37,9 @@ def get_obstacle(emitters):
 	try:
 		robot.lock.acquire()
 		robot.ser.write(struct.pack('>BHB',157,400,emitters))
-		return(robots.scribbler.read_2byte(robot.ser)+2**15)%2**16-2**15
+		#return(robots.scribbler.read_2byte(robot.ser)+2**15)%2**16-2**15
+		val=(robots.scribbler.read_2byte(robot.ser)+2**15)%2**16-2**15
+		return val
 	finally:
 		robot.lock.release()
 def get_encoders(keep=True):
@@ -95,8 +97,10 @@ def every(seconds, *args, **kwargs):
 		def update():
 			t = threading.Timer(seconds, update)
 			t.daemon = True
-			f(*args, **kwargs)
-			t.start()
+			try:
+				f(*args, **kwargs)
+			finally:
+				t.start()
 		update()
 		return f
 	return decorator
