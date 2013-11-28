@@ -12,7 +12,7 @@ from myro import setIRPower
 from scipy.misc import toimage
 
 obstaclemap = Map(Prior(), 40, 40) # XXX dimensions and initial P (currently grid points every 10 cm)
-irps = [cycle((125, 131, 137, 143, 146))]
+irps = [cycle((131, 137, 143, 149, 152))]
 
 # NOTES:
 # - call set_target on a target point (grid coords -- not real coords)
