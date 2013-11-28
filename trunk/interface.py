@@ -176,4 +176,6 @@ if __name__=="__main__":
 	}
 	config['/'].update(auth)
 	config['/photos'].update(auth)
+	cherrypy.engine.timeout_monitor.unsubscribe()
+	cherrypy.engine.autoreload.unsubscribe()
 	cherrypy.quickstart(ScribblerCommander(), config=config)
