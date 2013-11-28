@@ -2,7 +2,7 @@ from pickle import load
 from numpy import arange, pi, exp, log, tan, arctan, linspace, around, ndarray, array, ones, zeros, meshgrid, searchsorted, hypot, arctan2, abs, isnan, isfinite, nan_to_num
 try:
     from scipy.integrate import quad
-    from scipy.interpolate import UnivariateSpline
+    from scipy.interpolate import UnivariateSpline, pchip
 except ImportError:
     pass
 from util import memoize, xp_initialize, get_obstacle
@@ -86,18 +86,22 @@ class Map(object):
 		self.d = zeros((w, h))
 		self.r0 = .093
 		self.R = tan(linspace(0, arctan(P._max_r / P._h), num=10 * P._N + 1)) * P._h
+		self.cb = None
 	def update(self, x0, y0, theta0, irp, v):
 		'''update the map using sensor data
 		x0, y0, theta0 are standard mathematics x, y, theta'''
 		#self.d[~isfinite(self.d)] = self.log_rho
 		self.d *= self.lambd
 		# use P_r(r) as a cached for P(irp, v, r) 
-		P_r = UnivariateSpline(self.R, exp(array([self.P(irp, v, r) for r in self.R])))
-		P_r_i = UnivariateSpline(self.R, array([P_r.integral(0, r) for r in self.R]))
+		points = exp(array([self.P(irp, v, r) for r in self.R]))
+		P_r = UnivariateSpline(self.R, points)
+		P_r_i = pchip(self.R, array([0] + map(P_r.integral, self.R[:-1], self.R[1:])).cumsum())
 		scaling = 1. / max(1, P_r_i(self.P._max_r))
 		def prob(r):
-			return P_r(r) * (1 - P_r_i(r) / scaling)
+			return min(1, max(0, P_r(r) * (1 - P_r_i(r) / scaling)))
 		# calculate radii, set of radii and thetas
+		if P_r_i(.1) > 1e-4 and self.cb:
+			self.cb()
 		x = self._x - x0
 		y = self._y - y0
 		radii = hypot(x, y) - self.r0

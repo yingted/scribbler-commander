@@ -28,9 +28,14 @@ def update(*t_key_val):
 	finally:
 		deltas_change.release()
 def search():
-	pathfinder.irps.push(itertools.cycle((128,)))
-	myro.forward(.3)
-	myro.wait(.1)
+	pathfinder.irps.append(itertools.cycle((128,)))
+	done = [False]
+	def cb():
+		done[0] = True
+	pathfinder.obstaclemap.P.cb = cb
+	while not done[0]:
+		myro.forward(.3)
+		myro.wait(.1)
 	pathfinder.irps.pop()
 class Subscription(object):
 	def __init__(self):
