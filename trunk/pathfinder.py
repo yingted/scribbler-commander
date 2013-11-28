@@ -113,7 +113,7 @@ def initialize_pathfinder():
             # we currently scrap partial paths, which might be useful, 
             # but that's okay.
             iterastar = resetAstar(start,newtarget)
-        else if newtarget != None and iterastar != None:
+        elif newtarget != None and iterastar != None:
             try:
                 # step once thru A*
                 iterastar()
@@ -214,8 +214,8 @@ def trace_path(src, dest):
         cur = camefrom[cur]
     out = deque([])
     for i in reversed(path):
-		out.append((obstaclemap.x[i[0]], obstaclemap.y[i[1]]) )
-	return out
+        out.append((obstaclemap.x[i[0]], obstaclemap.y[i[1]]) )
+    return out
 
 
 def arclength_turn(theta):
