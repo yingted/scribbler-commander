@@ -128,7 +128,7 @@ def initialize_pathfinder():
                 util.state["arclengths_ahead"] = path_to_arclengths(trace)
                 newtarget = None
                 iterastar = None
-        else: sleep(75)
+        else: sleep(7.5)
     show = cycle([True]+[False]*4)
     @util.every(.3)
     def update_sensors():
@@ -288,7 +288,8 @@ def initialize_pathfollower():
     global last_time, current_interval
     last_movestart = time()
     current_interval = 0
-    @util.every(50)
+    util.state["arclengths_ahead"] = None
+    @util.every(5.0)
     def followPathThread():
         path = util.state["arclengths_ahead"]
         if not path:

@@ -80,7 +80,7 @@ class ScribblerCommander(object):
 		myro.stop()
 	@ajax
 	def music(self):
-		threading.Thread(target=playsong,args=("fur elise",)).start()
+		threading.Thread(target=Song_test.playsong,args=("fur elise",)).start()
 	@ajax
 	def search(self):
 		threading.Thread(target=search).start()
@@ -91,7 +91,7 @@ class ScribblerCommander(object):
 		except AttributeError:
 			raise cherrypy.HTTPError(503, 'Service Unavailable')
 	@ajax#XXX handle non-ajax
-	#@util.every(10)#XXX debug
+	@util.every(10)#XXX debug
 	def photo(self=None):
 		try:
 			deltas_change.acquire()

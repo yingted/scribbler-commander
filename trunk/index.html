@@ -134,10 +134,22 @@
 			#templates{
 				display:none;
 			}
+			#viewer{
+				/*display:none;*/
+				position:fixed;
+				top:50%;
+				left:40%;
+				height:480px;
+				width:640px;
+				margin-left:-240px;
+				margin-top:-320px;
+				z-index:1;
+			}
 			
 		</style>
 	</head>
 	<body class="disconnected">
+		<img id="viewer" href="#" src="http://localhost:8080/photos/2013-11-28T08:14:51.503471.jpg">
 		<form method="post">
 			<img id="arrows" usemap="#move" src="static/css/MoveArrows.png" alt="Move Arrows">
 			<map name="move">
@@ -190,7 +202,7 @@
 		</div>
 		<div id="templates">
 			<li class="photo-item">
-				<img width="160" height="128">
+				<a target="_blank" title="open in new window"><img width="160" height="128"></a>
 			</li>
 		</div>
 		<script>
@@ -369,13 +381,21 @@
 					e.preventDefault();
 					$.post("/"+$(this).attr("name"));
 				});
-				$("form [name=go]").click(function(e){
+				$("input[name=go]").click(function(e){
 					e.preventDefault();
 					$.post("/"+$(this).val())
 						.done(function(data){
 							$("#photo").attr("alt",data.path).attr("src",data.path);
 							$("#photo-link").attr("href",data.path);
 						});
+				});
+				function photoItem(photo){
+					var $elt=$("#templates>.photo-item").clone().prependTo("#photo-list");
+					$elt.find("a").attr("href",photo.path).find("img").attr("src",photo.path);
+					return $elt;
+				}
+				$("#viewer").click(function(){
+					$(this).hide("fast");
 				});
 				function showPhoto(photo){
 					console.log("showing thumbnail",photo);
@@ -411,6 +431,7 @@
 							}
 							if(e.which==40){
           							$.post("/backward");
+							}
 						}
  					});
 				});
@@ -423,8 +444,9 @@
 						if(!connected)
 							$("battery-level").text("not connected");
 					}).trigger("connected",false).on("photo",function(e,photo){
-						$("#templates>.photo-item").clone().prependTo("#photo-list").find("img").attr("src",photo.path);
+						var $elt=photoItem(photo);
 						showPhoto(photo);
+						return $elt;
 					}).on("trail",function(e,data){
 						trail.push(data);
 					}).on("where trail",function(){
@@ -469,8 +491,7 @@
 							$.post("/history?key=photo&t="+data.t)
 								.done(function(photos){
 									$(photos.reverse()).map(function(i,e){
-										var $elt=$("#templates>.photo-item").clone();
-										$elt.find("img").attr("src",e[1].path);
+										var $elt=photoItem(e[1]);
 										showPhoto(e[1]);
 										return $elt[0];
 									}).appendTo("#photo-list");
