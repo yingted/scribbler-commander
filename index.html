@@ -166,7 +166,6 @@
 		</div>
 		<div id="photos">
 			<ul id="photo-list"></ul>
-
 		</div>
 		<div id="templates">
 			<li class="photo-item">
@@ -351,6 +350,9 @@
 							$("#photo-link").attr("href",data.path);
 						});
 				});
+				function showPhoto(photo){
+					console.log(photo);
+				}
 				var photos=[],state={},trail=[];
 				$(document)
 					.on("connected",function(e,connected){
@@ -360,6 +362,7 @@
 							$("battery-level").text("not connected");
 					}).trigger("connected",false).on("photo",function(e,photo){
 						$("#templates>.photo-item").clone().prependTo("#photo-list").find("img").attr("src",photo.path);
+						showPhoto(photo);
 					}).on("trail",function(e,data){
 						trail.push(data);
 					}).on("where trail",function(){
@@ -401,6 +404,7 @@
 									$(photos.reverse()).map(function(i,e){
 										var $elt=$("#templates>.photo-item").clone();
 										$elt.find("img").attr("src",e[1].path);
+										showPicture(e[1]);
 										return $elt[0];
 									}).appendTo("#photo-list");
 								});
