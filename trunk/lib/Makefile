@@ -31,6 +31,7 @@ pyserial-2.2.zip:
 	wget -O pyserial-2.2.zip 'http://downloads.sourceforge.net/project/pyserial/pyserial/2.2/pyserial-2.2.zip?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Fpyserial%2Ffiles%2Fpyserial%2F2.2%2F'
 Imaging-1.1.7:
 	wget -O- http://effbot.org/downloads/Imaging-1.1.7.tar.gz | tar xz
+	cd Imaging-1.1.7 && sed -i "/^def find_library_file/a\    self.compiler.library_dirs.append('/usr/lib64')" setup.py
 root/lib/python2.4/site-packages/PIL.pth: Imaging-1.1.7
 	cd $< && ../python setup.py install
 numpy-1.7.1:
