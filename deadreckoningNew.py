@@ -10,10 +10,11 @@ PRINT_COORDINATES = False
 UPDATE_INTERVAL = 0.1#Seconds
 SPEED_CHANGE_SENSITIVITY = 2#in number of update intervals, lower = more sensitive
 runThread = True
+individualTest = False
 motorValues = [[0.0,0]]
 for i in range(19,107,8):
-    motorValues.append([float(i)/-100.0,-1.0*((i-19.0)/8.0*48.0+113.0)])
-    motorValues.append([float(i)/100.0,(i-19.0)/8.0*48.0+113.0])
+    motorValues.append([float(i)/-100.0,-1.0*((i-19.0)/8.0*48.0+103.0)])
+    motorValues.append([float(i)/100.0,(i-19.0)/8.0*48.0+103.0])
 multiplierValues = []
 for value in motorValues:
     multiplierValues.append([value[0],float(value[1])/float(motorValues[len(motorValues)-1][1])])
@@ -80,7 +81,8 @@ def update():
     distanceRight = float(encoders[1])*DISTANCE_PER_COUNT/2.0#gets distance travelled by right wheel
     delta_t=time.time()-previousTime
     moveHistory.append([distanceLeft*0.001,distanceRight*0.001,delta_t])
-    state['trail']=distanceLeft*0.001,distanceRight*0.001
+    if(individualTest):
+        state['trail']=distanceLeft*0.001,distanceRight*0.001
     cosCurrentAngle = math.cos(robotHeading)#cosine of current angle
     sinCurrentAngle = math.sin(robotHeading)#sine of current angle
     if(encoders[0]==encoders[1]):#if the distances are equal (robot is going straight)
@@ -96,7 +98,8 @@ def update():
         robotHeading -= 2.0*math.pi
     while robotHeading < -math.pi:
         robotHeading += 2.0*math.pi
-    state['where']=getX(),getY(),getHeading()
+    if(individualTest):
+        state['where']=getX(),getY(),getHeading()
 
 def stopThread():
     global runThread
@@ -180,7 +183,7 @@ def getMoveHistory(begin=0,end=None):#returns in reverse chronological order, en
     return output
 
 if __name__=='__main__':
-    #xp_initialize()
+    xp_initialize()
     pass
 
 def calibrate():
@@ -192,3 +195,10 @@ def calibrate():
         print get_encoders(False)
         print "__________"
     stop()
+
+def go():
+    get_encoders(False)
+    motors(1,1)
+    time.sleep(1.0)
+    stop()
+    get_encoders(False)
