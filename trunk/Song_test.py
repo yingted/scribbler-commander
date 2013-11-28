@@ -31,5 +31,5 @@ def playnote(a):
     else:
         beep(a[0],freq(a[1]),freq(a[2]))
         
-playsong("fur elise")
+#playsong("fur elise")
 

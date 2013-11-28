@@ -14,6 +14,7 @@ import datetime
 util.connect_async()
 import deadreckoningNew as deadreckoning
 import pathfinder
+import Song_test
 from pathfinder import cancel_pathfollower as killpath
 def ajax(handler):
 	return cherrypy.expose(cherrypy.tools.allow(methods=('POST',))(cherrypy.tools.json_out()(handler)))
@@ -27,6 +28,8 @@ def update(*t_key_val):
 		deltas_change.notifyAll()
 	finally:
 		deltas_change.release()
+def search():
+	pass
 class Subscription(object):
 	def __init__(self):
 		self.prefix.reverse()
@@ -75,6 +78,12 @@ class ScribblerCommander(object):
 	def stop(self):
 		killpath()
 		myro.stop()
+	@ajax
+	def music(self):
+		threading.Thread(target=playsong,args=("fur elise",)).start()
+	@ajax
+	def search(self):
+		threading.Thread(target=search).start()
 	@ajax
 	def battery(self):
 		try:
