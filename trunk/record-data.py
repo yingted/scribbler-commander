@@ -6,7 +6,7 @@ from time import time
 f=open(argv[1],'w')
 xp_initialize()
 out=[]
-for irp in xrange(122,147,3):
+for irp in xrange(128,156,3):
 	robot.setIRPower(irp)
 	get_obstacle(7)
 	while True:
