@@ -99,7 +99,7 @@ def getY():
     return y_pos*0.001
 
 def getHeading():
-    return robotHeading
+    return (robotHeading+3*math.pi/2)%(2*pi)-math.pi
 
 def getSpeed(move):
     return (move[0]+move[1])/2.0/move[2]
