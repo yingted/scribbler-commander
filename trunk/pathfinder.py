@@ -102,11 +102,15 @@ def initialize_pathfinder():
     start = finish = util.state["where"][:2]
     openset = [(cost(start, finish), start)]
     f_score = {start:cost(start,finish)} # estimated total cost to target
+    on_main_thread = [True]
     @util.every(10)
     def pathfinderThread():
         """The thread that continually waits on target change and 
         runs A* whenever a new target is set"""
         global iterastar, pathpoints, newtarget
+        if on_main_thread:
+            on_main_thread.pop()
+            return
         # stuff happens
         if newtarget != finish:
             start = util.state["where"][:2]
@@ -281,30 +285,30 @@ findloops(camefrom)
 last_movestart = time()
 current_interval = 0
 def initialize_pathfollower():
-	global last_time, current_interval
-	last_movestart = time()
-	current_interval = 0
-	@util.every(50)
-	def followPathThread():
-		path = util.state["arclengths_ahead"]
-		if not path:
-			motors(0,0)
-			return
-		global last_movestart, current_interval
-		if time() - last_movestart >= current_interval:
-			# time to switch to next thing
-			move = al2st(*path.popleft())
-			util.state["arclengths_ahead"] = path
-			last_movestart = time()
-			current_interval = move[2]
-			motors(move[0],move[1])
-		
-		
-	
-	
+    global last_time, current_interval
+    last_movestart = time()
+    current_interval = 0
+    @util.every(50)
+    def followPathThread():
+        path = util.state["arclengths_ahead"]
+        if not path:
+            motors(0,0)
+            return
+        global last_movestart, current_interval
+        if time() - last_movestart >= current_interval:
+            # time to switch to next thing
+            move = al2st(*path.popleft())
+            util.state["arclengths_ahead"] = path
+            last_movestart = time()
+            current_interval = move[2]
+            motors(move[0],move[1])
+        
+        
+    
+    
 
 def cancel_pathfollower():
-	resetAstar(None, None)
+    resetAstar(None, None)
 
 
 if __name__ == "__main__":

@@ -95,7 +95,7 @@ class Map(object):
 		P_r = UnivariateSpline(self.R, exp(array([self.P(irp, v, r) for r in self.R])))
 		scaling = 1. / max(1, P_r.integral(0, self.P._max_r))
 		def prob(r):
-			return P_r(r) / P_r.integral(0, r) * scaling
+			return P_r(r) * (1 - P_r.integral(0, r) / scaling)
 		# calculate radii, set of radii and thetas
 		x = self._x - x0
 		y = self._y - y0
