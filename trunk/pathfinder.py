@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 import numpy # currently unused, should be used for optimization
 from math import hypot, atan2, pi
-from heapq import *
-import threading # might not be necessary if thread not started here
-#import util # needed for state object
+from heapq import heappush, heappop
+#import threading # might not be necessary if thread not started here
+import util # needed for state object
 from time import sleep
 from model import Map,Prior
 from movement import SCRIBBLER_RADIUS
