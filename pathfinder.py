@@ -12,7 +12,6 @@ from myro import setIRPower
 from scipy.misc import toimage
 from deadreckoningNew import arcLengthToSpeedTime as al2st
 from time import time
-from collections import deque
 from myro import motors # is motors here?
 
 obstaclemap = Map(Prior(), 40, 40) # XXX dimensions and initial P (currently grid points every 10 cm)
@@ -37,14 +36,15 @@ be restarted with a new target.
 """
 newtarget = None
 
+def nearest_grid(xy):
+    if xy is not None:
+        x, y = xy
+        return int(x / obstaclemap.m_per_unit / obstaclemap.upsample + obstaclemap.s / 2), int(y / obstaclemap.m_per_unit / obstaclemap.upsample + obstaclemap.s / 2)
 def set_target(xy):
     '''sets the target to x, y
     returns immediately'''
     global newtarget
-    if xy is not None:
-        x, y = xy
-        xy = int(x / obstaclemap.m_per_unit / obstaclemap.upsample + obstaclemap.s / 2), int(y / obstaclemap.m_per_unit / obstaclemap.upsample + obstaclemap.s / 2)
-    newtarget = xy
+    newtarget = nearest_grid(xy)
 
 start = None
 finish = None
@@ -101,7 +101,7 @@ iterastar = None
 
 def initialize_pathfinder():
     global start, finish, openset, f_score
-    start = finish = util.state["where"][:2]
+    start = finish = nearest_grid(util.state["where"][:2])
     openset = [(cost(start, finish), start)]
     f_score = {start:cost(start,finish)} # estimated total cost to target
     on_main_thread = [True]
@@ -117,17 +117,15 @@ def initialize_pathfinder():
         if newtarget is None:
             return
         if newtarget != finish:
-            start = util.state["where"][:2]
+            start = nearest_grid(util.state["where"][:2])
             # we currently scrap partial paths, which might be useful, 
             # but that's okay.
             resetAstar(start, newtarget)
             astar()
             # A* finished, so we update state
             trace = trace_path(start, finish)
-            print"="*100
-            print trace
-            util.state["pathpoints"] = trace
-            util.state["arclengths_ahead"] = path_to_arclengths(trace)
+            util.state["pathpoints"] = list(trace)
+            util.state["arclengths_ahead"] = list(path_to_arclengths(trace))
             newtarget = None
             iterastar = None
         else: sleep(7.5)
@@ -219,9 +217,10 @@ def trace_path(src, dest):
         #print cur
         path.append(cur)
         cur = camefrom[cur]
-    out = deque([])
+    out = ([])
     for i in reversed(path):
-        out.append((obstaclemap.x[i[0]], obstaclemap.y[i[1]]) )
+        _i, _j = i
+        out.append((obstaclemap.x[_i, _j], obstaclemap.y[_i, _j]) )
     return out
 
 
@@ -239,7 +238,7 @@ def path_to_arclengths(path):
     returns [(left_forward, right_forward),...]
     """
     p = util.state["where"]
-    out = deque([])
+    out = ([])
     heading = p[2]
     cur = p[:2]
     for dest in path:
@@ -295,7 +294,7 @@ def initialize_pathfollower():
     @util.every(.1)
     def followPathThread():
         global last_movestart, current_interval
-        path = util.state["arclengths_ahead"]
+        path = (util.state["arclengths_ahead"])
         if not path:
             if path is not None:
                 motors(0,0)
@@ -303,8 +302,9 @@ def initialize_pathfollower():
             return
         if time() - last_movestart >= current_interval:
             # time to switch to next thing
-            move = al2st(*path.popleft())
-            util.state["arclengths_ahead"] = path
+            move = al2st(*path[0])
+            path = path[1:]
+            util.state["arclengths_ahead"] = list(path)
             last_movestart = time()
             current_interval = move[2]
             motors(move[0],move[1])
