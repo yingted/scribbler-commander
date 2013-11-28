@@ -65,11 +65,11 @@ class ScribblerCommander(object):
 	@ajax
 	def left(self):
 		killpath()
-		myro.turn(1)
+		myro.turn(.2)
 	@ajax
 	def right(self):
 		killpath()
-		myro.turn(-1)
+		myro.turn(-.2)
 	@ajax
 	def stop(self):
 		killpath()

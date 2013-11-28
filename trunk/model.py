@@ -74,9 +74,12 @@ class Map(object):
 		self.w = w
 		self.h = h
 		self.s = 8.
-		self.m_per_unit = self.s / 40.
+		self.upsample = 20
+		self.m_per_unit = self.s / 40. / self.upsample
 		endpoint = (self.s - self.m_per_unit) / 2
-		self.x, self.y = meshgrid(linspace(-endpoint, endpoint, num = w), linspace(-endpoint, endpoint, num = h))
+		w *= self.upsample
+		h *= self.upsample
+		self._x, self._y = meshgrid(linspace(-endpoint, endpoint, num = w), linspace(-endpoint, endpoint, num = h))
 		rho = .15
 		self.log_rho = log(rho)
 		self.lambd = .95
@@ -89,9 +92,10 @@ class Map(object):
 		self.d *= self.lambd
 		# use P_r(r) as a cached for P(irp, v, r) 
 		P_r = UnivariateSpline(self.R, array([self.P(irp, v, r) for r in self.R]))
+		factor = exp(P_r(self.R))
 		# calculate radii, set of radii and thetas
-		x = self.x - x0
-		y = self.y - y0
+		x = self._x - x0
+		y = self._y - y0
 		radii = hypot(x, y)
 		thetas = (arctan2(y, x) - theta0 + pi) % (2 * pi) - pi
 		H = self.P.v(irp, v)
@@ -104,7 +108,22 @@ class Map(object):
 		self.d += exp(self.P.theta(thetas.flatten()).reshape(shape)) * (E - H).clip(-k, k) * (radii <= self.P._max_r)
 		#print v, self.d
 	@property
+	def x(self):
+		print'shape',self._x[self.upsample/2::self.upsample,self.upsample/2::self.upsample].shape
+		return self._x[self.upsample/2::self.upsample,self.upsample/2::self.upsample]
+	@property
+	def y(self):
+		return self._y[self.upsample/2::self.upsample,self.upsample/2::self.upsample]
+	@property
 	def p(self):
+		'''returns probabilities'''
+		factor = exp(self.d[self.upsample/2::self.upsample,self.upsample/2::self.upsample])
+		#return factor / (1 + factor)
+		factor = factor / (factor + 1.)
+		#print "Z=",factor.sum(),"max=",factor.max(),factor
+		return factor
+	@property
+	def _p(self):
 		'''returns probabilities'''
 		factor = exp(self.d)
 		#return factor / (1 + factor)
@@ -132,7 +151,8 @@ if __name__=='__main__':
 	#print P.v(134, 1000)
 	#print [P(134, 1000, (i+.5)/5.*.3+.2) for i in xrange(5)]
 	xp_initialize()
-	irps = [125, 131, 137, 143, 146]
+	#irps = [125, 131, 137, 143, 146]
+	irps = [128]#, 131, 137, 143, 146]
 	hist = []
 	def distances():
 		rho = .15
