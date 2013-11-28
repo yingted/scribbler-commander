@@ -44,13 +44,13 @@ def deadReckoningThread():
     global previousTime, lastMove
     while runThread:
         update()
-        #lastMove += 1
-        #if(len(moveHistory)>SPEED_CHANGE_SENSITIVITY and not withinError(getAverageSpeedSinceLastChange(SPEED_CHANGE_SENSITIVITY),getRecentAverageSpeed(SPEED_CHANGE_SENSITIVITY))):
-            #lastMove = 0
+        lastMove += 1
+        if(len(moveHistory)>SPEED_CHANGE_SENSITIVITY and not withinError(getAverageSpeedSinceLastChange(SPEED_CHANGE_SENSITIVITY),getRecentAverageSpeed(SPEED_CHANGE_SENSITIVITY))):
+            lastMove = 0
         previousTime = time.time()
         if(PRINT_COORDINATES):
             getCoords(DEFAULT_DIGITS)
-        time.sleep(UPDATE_INTERVAL-time.time()+previousTime)
+        time.sleep(max(0,UPDATE_INTERVAL-time.time()+previousTime))
 
 #updates the position
 def update():
@@ -99,7 +99,7 @@ def getY():
     return y_pos*0.001
 
 def getHeading():
-    return (robotHeading+3*math.pi/2)%(2*pi)-math.pi
+    return (robotHeading+3*math.pi/2)%(2*math.pi)-math.pi
 
 def getSpeed(move):
     return (move[0]+move[1])/2.0/move[2]
