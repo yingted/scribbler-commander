@@ -117,7 +117,6 @@ class Map(object):
 		#print v, self.d
 	@property
 	def x(self):
-		print'shape',self._x[self.upsample/2::self.upsample,self.upsample/2::self.upsample].shape
 		return self._x[self.upsample/2::self.upsample,self.upsample/2::self.upsample]
 	@property
 	def y(self):

@@ -169,7 +169,7 @@ class ScribblerCommander(object):
 		if y is None:
 			pathfinder.set_target(None)
 		else:
-			pathfinder.set_target((x, y))
+			pathfinder.set_target((float(x), float(y)))
 if __name__=="__main__":
 	current_dir = os.path.dirname(os.path.abspath(__file__))
 	config = {

@@ -111,35 +111,56 @@ class State(shelve.DbfilenameShelf):
 		shelve.DbfilenameShelf.__init__(self, filename, flag, protocol, writeback)
 		atexit.register(self.close)
 		self.handlers = []
+		self.lock = threading.RLock()
 	def history(self, key):
 		'''returns the history of the values of the key
 		the return value should not be changed'''
-		if not isinstance(key, basestring):
-			raise KeyError(key)
-		return shelve.DbfilenameShelf.__getitem__(self, key)
+		self.lock.acquire()
+		try:
+			if not isinstance(key, basestring):
+				raise KeyError(key)
+			return shelve.DbfilenameShelf.__getitem__(self, key)
+		finally:
+			self.lock.release()
 	def age(self, key):
 		'''returns how long ago the key was set'''
+		self.lock.acquire()
 		try:
 			return time.time()-self.history(key)[-1][0]
 		except KeyError:
+			self.lock.release()
 			return float('inf')
+		else:
+			self.lock.release()
 	def __getitem__(self, key):
 		'''returns the current value of the key'''
-		return self.history(key)[-1][1]
+		self.lock.acquire()
+		try:
+			return self.history(key)[-1][1]
+		finally:
+			self.lock.release()
 	def watch(self, cb):
 		'''adds a callback for setitem'''
-		self.handlers.append(cb)
+		self.lock.acquire()
+		try:
+			self.handlers.append(cb)
+		finally:
+			self.lock.release()
 	def __setitem__(self, key, val):
 		'''adds a new value to this history'''
-		l = []
-		if key in self:
-			l = self.history(key)
-		t = time.time()
-		l.append((t, val))
-		shelve.DbfilenameShelf.__setitem__(self, key, l)
-		for cb in self.handlers:
-			cb(t, key, val)
-		self.sync()
+		self.lock.acquire()
+		try:
+			l = []
+			if key in self:
+				l = self.history(key)
+			t = time.time()
+			l.append((t, val))
+			shelve.DbfilenameShelf.__setitem__(self, key, l)
+			for cb in self.handlers:
+				cb(t, key, val)
+			self.sync()
+		finally:
+			self.lock.release()
 state = State()
 
 state['connected'] = False
