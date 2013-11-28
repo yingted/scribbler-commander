@@ -15,8 +15,7 @@ def set_target(xy):
     newtarget = xy
 
 # NOTES:
-# - call i() to start, stopThread to stop
-# - then call set_target on a target point (absolute coordinates)
+# - call set_target on a target point (grid coords -- not real coords)
 #   to set the target of the A*
 #
 # - `cost` and `neighbors` do special things based on the map data -- 
@@ -97,7 +96,7 @@ def pathfinderThread():
             iterastar()
         except StopIteration:
             # A* finished, so we update state
-            pathpoints = trace_path(start, finish)
+            util.state["pathpoints"] = trace_path(start, finish)
             newtarget = None
 
 
@@ -169,7 +168,7 @@ def trace_path(src, dest):
         #print cur
         path.append(cur)
         cur = camefrom[cur]
-    return list(reversed(path))
+    return [(obstaclemap.x[i[0]], obstaclemap.y[i[1]]) for i in reversed(path)]
 
 def findloops(graph):
     """
