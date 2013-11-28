@@ -9,7 +9,7 @@ import collections
 import shelve
 import time
 import atexit
-_use_simulator = True
+_use_simulator = False
 def simulator_started():
 	# connect to myro
 	try:
@@ -51,6 +51,8 @@ def get_encoders(keep=True):
 		robot.lock.release()
 def grab_jpeg_color(out, reliable):
 	'''reads a jpeg scan to a file.write function'''
+	if _use_simulator:
+		raise RuntimeError('simulator has no camera')
 	try:
 		robot.lock.acquire()
 		if robot.color_header == None:
@@ -148,6 +150,7 @@ def connect_async(cb=None):
 	else:
 		state['connected'] = False
 		xp_initialize()
+		import deadreckoningNew as deadreckoning
 		deadreckoning.initialize_deadReckoning()
 	state['connected'] = True
 	if cb is not None:
