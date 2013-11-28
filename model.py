@@ -1,5 +1,5 @@
 from pickle import load
-from numpy import arange, pi, exp, log, tan, arctan, linspace, around, ndarray, array, ones, meshgrid, searchsorted, hypot, arctan2, abs, isnan, isfinite
+from numpy import arange, pi, exp, log, tan, arctan, linspace, around, ndarray, array, ones, zeros, meshgrid, searchsorted, hypot, arctan2, abs, isnan, isfinite, nan_to_num
 try:
     from scipy.integrate import quad
     from scipy.interpolate import UnivariateSpline
@@ -16,7 +16,7 @@ class Prior(object):
 	_max_r = 1.23
 	_max_t = 50
 	_r_to_t = _max_t / _max_r
-	_sigma_theta = pi / 12 #TODO measure
+	_sigma_theta = pi / 24 #TODO measure
 	_var_theta = _sigma_theta**2
 	_max_v = 6400 #for opcode 157 with latency 400
 	_N = 17
@@ -79,16 +79,14 @@ class Map(object):
 		self.x, self.y = meshgrid(linspace(-endpoint, endpoint, num = w), linspace(-endpoint, endpoint, num = h))
 		rho = .15
 		self.log_rho = log(rho)
-		self.lambd = .6
-		self.d = ones((w, h)) * self.log_rho#log-probabilities
+		self.lambd = .95
+		self.d = zeros((w, h))
 		self.R = tan(linspace(0, arctan(P._max_r / P._h), num=3 * P._N + 1)) * P._h
 	def update(self, x0, y0, theta0, irp, v):
 		'''update the map using sensor data
-		x0, y0, theta0 are standard mathematics x, y, theta
-		returns probabilities at self.x and self.y or None on failure'''
+		x0, y0, theta0 are standard mathematics x, y, theta'''
 		#self.d[~isfinite(self.d)] = self.log_rho
-		self.d = (self.d - self.log_rho) * self.lambd + self.log_rho
-		H = self.P.v(irp, v)
+		self.d *= self.lambd
 		# use P_r(r) as a cached for P(irp, v, r) 
 		P_r = UnivariateSpline(self.R, array([self.P(irp, v, r) for r in self.R]))
 		# calculate radii, set of radii and thetas
@@ -96,20 +94,23 @@ class Map(object):
 		y = self.y - y0
 		radii = hypot(x, y)
 		thetas = (arctan2(y, x) - theta0 + pi) % (2 * pi) - pi
+		H = self.P.v(irp, v)
 		shape = radii.shape
-		radii = radii.clip(0, self.P._max_r)
-		E = P_r(radii.flatten().clip(0, self.P._max_r)).reshape(shape)
-		#E = array([P_r(radius) for radius in radii.flatten()]).reshape(shape)
+		E = nan_to_num(P_r(radii.flatten())).reshape(shape)
 		if isnan(E.sum()):
 			E = ones(shape) / E.size#XXX salvage values
 		k = 20.
 		#print E - H
-		self.d += exp(self.P.theta(thetas.flatten()).reshape(shape)) * (E - H).clip(-k, k)
+		self.d += exp(self.P.theta(thetas.flatten()).reshape(shape)) * (E - H).clip(-k, k) * (radii <= self.P._max_r)
 		#print v, self.d
 	@property
 	def p(self):
-		'''returns non-log probabilities'''
-		return exp(self.d)
+		'''returns probabilities'''
+		factor = exp(self.d)
+		#return factor / (1 + factor)
+		factor = factor / (factor + 1.)
+		#print "Z=",factor.sum(),"max=",factor.max(),factor
+		return factor
 if __name__=='__main__':
 	from myro import *
 	from numpy import array, set_printoptions, dot

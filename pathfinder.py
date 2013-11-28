@@ -120,7 +120,8 @@ def initialize_pathfinder():
                 util.state["arclengths_ahead"] = path_to_arclengths(trace)
                 newtarget = None
                 iterastar = None
-    @util.every(.1)
+    show = cycle([True]+[False]*4)
+    @util.every(.3)
     def update_sensors():
         irp = None
         while irp is None:
@@ -131,10 +132,11 @@ def initialize_pathfinder():
         x, y, theta = util.state['where']
         setIRPower(irp)#XXX thread safety
         obstaclemap.update(x, y, theta, irp, util.get_obstacle('center'))
-        out = StringIO()
-	data = 255 - (255 * obstaclemap.p[::-1]).astype('uint8')
-	toimage(data).save(out, format='png')
-        util.state['map_path'] = 'data:image/png;base64,' + out.getvalue().encode('base64').replace('\n', '')
+        if show.next():
+            out = StringIO()
+            data = 255 - (255 * obstaclemap.p[::-1]).astype('uint8')
+            toimage(data).save(out, format='png')
+            util.state['map_path'] = 'data:image/png;base64,' + out.getvalue().encode('base64').replace('\n', '')
 
 #definitely_obstacle = 0.85
 def neighbors(x,y=None):
