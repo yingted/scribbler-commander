@@ -8,7 +8,7 @@ with open(argv[1])as f:
 	ax=fig.add_subplot(111)
 	#clr=iter(cycle('bgrcmykw'))
 	clr=iter(cycle('bgrcmyk'))
-	for ent in load(f):
+	for ent in sorted(load(f),key=lambda x:x['irp']):
 		start=ent['data'][0]['t']*1.5-.5*ent['data'][1]['t']
 		t=[]
 		v=[]
@@ -18,6 +18,7 @@ with open(argv[1])as f:
 		ax.scatter(t,v,c=next(clr),marker='x')
 if len(argv)>2:
 	with open(argv[2])as f:
+		clr=iter(cycle('bgrcmyk'))
 		for irp,ent in sorted(load(f).items()):
-			ax.errorbar(Prior._times,ent['mu'],yerr=ent['sigma'],fmt='-o')
+			ax.errorbar(Prior._times,ent['mu'],yerr=ent['sigma'],fmt='-o',c=next(clr))
 show()

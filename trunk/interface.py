@@ -71,7 +71,7 @@ class ScribblerCommander(object):
 	@ajax
 	def battery(self):
 		try:
-			return myro.getBattery() / 9.
+			return (myro.getBattery() - 5.8) / (9. - 5.8)
 		except AttributeError:
 			raise cherrypy.HTTPError(503, 'Service Unavailable')
 	@ajax#XXX handle non-ajax
