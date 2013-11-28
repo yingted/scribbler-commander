@@ -21,3 +21,6 @@ record-data.py	record calibration data
 Song_test.py	play a song
 static/	static web content
 util.py	miscellaneous functions
+
+The custom firmware is in a separate repository:
+https://github.com/yingted/Myro
