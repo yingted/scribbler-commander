@@ -74,7 +74,7 @@ class Map(object):
 		self.w = w
 		self.h = h
 		self.s = 8.
-		self.upsample = 5
+		self.upsample = 3
 		self.m_per_unit = self.s / 40. / self.upsample
 		endpoint = (self.s - self.m_per_unit) / 2
 		w *= self.upsample
@@ -82,10 +82,10 @@ class Map(object):
 		self._x, self._y = meshgrid(linspace(-endpoint, endpoint, num = w), linspace(-endpoint, endpoint, num = h))
 		rho = .15
 		self.log_rho = log(rho)
-		self.lambd = .95
+		self.lambd = .99
 		self.d = zeros((w, h))
 		self.r0 = .093
-		self.R = tan(linspace(0, arctan(P._max_r / P._h), num=3 * P._N + 1)) * P._h
+		self.R = tan(linspace(0, arctan(P._max_r / P._h), num=10 * P._N + 1)) * P._h
 	def update(self, x0, y0, theta0, irp, v):
 		'''update the map using sensor data
 		x0, y0, theta0 are standard mathematics x, y, theta'''
@@ -107,7 +107,7 @@ class Map(object):
 		E = nan_to_num(log(array([prob(x) for x in radii.flatten()]).clip(0, 1))).reshape(shape)
 		if isnan(E.sum()):
 			E = zeros(shape)#XXX salvage values
-		k = 20.
+		k = 5.
 		#print E - H
 		self.d += exp(self.P.theta(thetas.flatten()).reshape(shape)) * (E - H).clip(-k, k) *((0 <= radii) & (radii <= self.P._max_r))
 		#print v, self.d
@@ -155,8 +155,7 @@ if __name__=='__main__':
 	#print P.v(134, 1000)
 	#print [P(134, 1000, (i+.5)/5.*.3+.2) for i in xrange(5)]
 	xp_initialize()
-	#irps = [125, 131, 137, 143, 146]
-	irps = [128, 134, 141, 147, 153]
+	irps = [125, 131, 137, 143, 146]
 	hist = []
 	def distances():
 		rho = .15
