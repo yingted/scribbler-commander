@@ -13,7 +13,6 @@ import numpy
 import datetime
 import deadreckoningNew as deadreckoning
 util.connect_async()
-import pathfinder
 def ajax(handler):
 	return cherrypy.expose(cherrypy.tools.allow(methods=('POST',))(cherrypy.tools.json_out()(handler)))
 deltas = []
