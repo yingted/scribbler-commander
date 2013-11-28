@@ -7,9 +7,24 @@ import threading # might not be necessary if thread not started here
 from time import sleep
 from model import Map,Prior
 from movement import pi, SCRIBBLER_RADIUS
+from itertools import *
+from cStringIO import StringIO
 
 obstaclemap = Map(Prior(), 40, 40) # XXX dimensions and initial P (currently grid points every 10 cm)
-
+irps = [cycle((125, 131, 137, 143, 146))]
+@util.every(.3)
+def update_sensors():
+    irp = None
+    while irp is None:
+        try:
+            irp = next(irps[-1])
+        except StopIteration:
+            irps.pop()
+    setIRPower(irp)#XXX thread safety
+    obstaclemap.update(x, y, theta, irp, get_obstacle('center'))
+    out = StringIO()
+    scipy.misc.toimage(obstaclemap.d).save(out, format='png')
+    util.state['map_path'] = 'data:image/png;base64,' + out.getvalue().encode('base64').replace('\n', '')
 def set_target(xy):
     '''sets the target to x, y
     returns immediately'''
@@ -90,7 +105,7 @@ def pathfinderThread():
     global iterastar, pathpoints
     # stuff happens
     if newtarget != finish:
-	    start = util.state["where"][:2]
+        start = util.state["where"][:2]
         # we currently scrap partial paths, which might be useful, 
         # but that's okay.
         iterastar = resetAstar(start,newtarget)

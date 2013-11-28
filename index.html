@@ -270,7 +270,8 @@
 					}).on("trail",function(e,data){
 						trail.push(data);
 					}).on("where trail",function(){
-						updateMap(state.where,trail.reverse(),null,null);
+						if(state.where)
+							updateMap(state.where,trail.reverse(),[]);
 					});
 				var params="";
 				(function subscribe(){
