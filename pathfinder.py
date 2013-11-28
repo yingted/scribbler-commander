@@ -291,11 +291,11 @@ def initialize_pathfollower():
     util.state["arclengths_ahead"] = None
     @util.every(5.0)
     def followPathThread():
+        global last_movestart, current_interval
         path = util.state["arclengths_ahead"]
         if not path:
             motors(0,0)
             return
-        global last_movestart, current_interval
         if time() - last_movestart >= current_interval:
             # time to switch to next thing
             move = al2st(*path.popleft())
