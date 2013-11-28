@@ -84,6 +84,7 @@ class Map(object):
 		self.log_rho = log(rho)
 		self.lambd = .95
 		self.d = zeros((w, h))
+		self.r0 = .093
 		self.R = tan(linspace(0, arctan(P._max_r / P._h), num=3 * P._N + 1)) * P._h
 	def update(self, x0, y0, theta0, irp, v):
 		'''update the map using sensor data
@@ -97,7 +98,7 @@ class Map(object):
 		# calculate radii, set of radii and thetas
 		x = self._x - x0
 		y = self._y - y0
-		radii = hypot(x, y)
+		radii = hypot(x, y) - self.r0
 		thetas = (arctan2(y, x) - theta0 + pi) % (2 * pi) - pi
 		H = self.P.v(irp, v)
 		shape = radii.shape
@@ -106,7 +107,7 @@ class Map(object):
 			E = zeros(shape)#XXX salvage values
 		k = 20.
 		#print E - H
-		self.d += exp(self.P.theta(thetas.flatten()).reshape(shape)) * (E - H).clip(-k, k) * (radii <= self.P._max_r)
+		self.d += exp(self.P.theta(thetas.flatten()).reshape(shape)) * (E - H).clip(-k, k) *((0 <= radii) & (radii <= self.P._max_r))
 		#print v, self.d
 	@property
 	def x(self):
