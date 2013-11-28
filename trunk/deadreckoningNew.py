@@ -2,8 +2,8 @@ from util import *
 import time
 import threading
 import math
-DISTANCE_PER_COUNT = 0.491426637992914#Millimeters
-ROBOT_DIAMETER = 148.5#Measurement in millimeters
+DISTANCE_PER_COUNT = 0.49833887#Millimeters
+ROBOT_DIAMETER = 142.5#Measurement in millimeters
 DEFAULT_DIGITS = 6
 PRINT_COORDINATES = False
 UPDATE_INTERVAL = 0.1#Seconds
@@ -50,7 +50,7 @@ def deadReckoningThread():
         previousTime = time.time()
         if(PRINT_COORDINATES):
             getCoords(DEFAULT_DIGITS)
-        time.sleep(max(0,UPDATE_INTERVAL-time.time()+previousTime))
+        time.sleep(max(0.0,UPDATE_INTERVAL-time.time()+previousTime))
 
 #updates the position
 def update():
