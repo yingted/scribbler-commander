@@ -285,7 +285,7 @@ findloops(camefrom)
 last_movestart = time()
 current_interval = 0
 def initialize_pathfollower():
-    global last_time, current_interval
+    global last_movestart, current_interval
     last_movestart = time()
     current_interval = 0
     util.state["arclengths_ahead"] = None
