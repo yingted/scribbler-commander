@@ -81,7 +81,7 @@ def update():
     distanceRight = float(encoders[1])*DISTANCE_PER_COUNT/2.0#gets distance travelled by right wheel
     delta_t=time.time()-previousTime
     moveHistory.append([distanceLeft*0.001,distanceRight*0.001,delta_t])
-    if(individualTest):
+    if(!individualTest):
         state['trail']=distanceLeft*0.001,distanceRight*0.001
     cosCurrentAngle = math.cos(robotHeading)#cosine of current angle
     sinCurrentAngle = math.sin(robotHeading)#sine of current angle
@@ -98,7 +98,7 @@ def update():
         robotHeading -= 2.0*math.pi
     while robotHeading < -math.pi:
         robotHeading += 2.0*math.pi
-    if(individualTest):
+    if(!individualTest):
         state['where']=getX(),getY(),getHeading()
 
 def stopThread():
