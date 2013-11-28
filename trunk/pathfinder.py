@@ -17,8 +17,10 @@ def set_target(xy):
 # NOTES:
 # - call set_target on a target point (grid coords -- not real coords)
 #   to set the target of the A*
+# - once A* finishes, the result path of coordinates is in 
+#	util.state["pathpoints"]
 #
-# - `cost` and `neighbors` do special things based on the map data -- 
+# - TODO `cost` and `neighbors` do special things based on the map data -- 
 #   some integration still needs doing
 #
 
@@ -43,14 +45,15 @@ def resetAstar(new_start, new_finish):
     Reset the A* search space to do a search from given start position 
     to given end position, return the generator object
     """
-    if new_finish is None or new_start is None:
-        return None
+    
     global start, finish, openset, closedset, camefrom, g_score, f_score
     start, finish = new_start, new_finish
-    openset = [(cost(start, finish), start)]
     closedset = set([])
     camefrom = {}
     util.state["pathpoints"] = []
+    if new_finish is None or new_start is None:
+        return None
+    openset = [(cost(start, finish), start)]
     g_score = {start:0} # best known cost from start
     f_score = {start:cost(start,finish)} # estimated total cost to target
     return astar().next # returns generator's next function
@@ -66,7 +69,8 @@ def cost((x1,y1),(x2,y2)):
     # XXX use obstaclemap.p
     # XXX currently doesn't check edge cases (or even negative indices)
     
-    return hypot(x1-x2,y1-y2)#/(1-obstaclemap.p[x2][y2]) # commented out to ignore obstacles
+    return hypot(x1-x2,y1-y2)/(1-obstaclemap.p[x2][y2]) 
+#	ignores prior path length (that's what A* is for)
 #   gonna get ugly -- 
 #   scales equivalent distance up with probability of obstacle at target
 #   not quite it, will figure tomorrow :D
@@ -75,9 +79,10 @@ openset = [(cost(start, finish), start)]
 f_score = {start:cost(start,finish)} # estimated total cost to target
 
 # XXX global pathpoints for debugging
-pathpoints = []
+#pathpoints = []
 iterastar = None
-@util.every(50)
+
+@util.every(50) # has to be turned back into threaded
 def pathfinderThread():
     """The thread that continually waits on target change and 
     runs A* whenever a new target is set"""
@@ -98,7 +103,7 @@ def pathfinderThread():
             newtarget = None
             iterastar = None
 
-
+definitely_obstacle = 0.85
 def neighbors(x,y=None):
     """
     Generates all neighbors of input location.
@@ -200,7 +205,6 @@ findloops(camefrom)
 """
 
 if __name__ == "__main__":
-    i()
     set_target((30,30))
     print "stuff happens"
     
