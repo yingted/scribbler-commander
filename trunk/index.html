@@ -182,6 +182,12 @@
 				function updateMap(pos,pTrail,trail){
 					var c=document.getElementById("map");
 					var gr=c.getContext("2d");
+
+					gr.save();
+					gr.setTransform(1,0,0,1,0,0);
+					gr.clearRect(0,0,c.width,c.height);
+					gr.restore();
+
 					gr.save()
 					gr.translate(c.width/2,c.height/2);
 					gr.scale(100,100);//100 px/m
