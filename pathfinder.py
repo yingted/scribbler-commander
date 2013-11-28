@@ -132,7 +132,7 @@ def initialize_pathfinder():
         setIRPower(irp)#XXX thread safety
         obstaclemap.update(x, y, theta, irp, util.get_obstacle('center'))
         out = StringIO()
-        toimage(1 - obstaclemap.p).save(out, format='png')
+        toimage(255 - (255 * obstaclemap.p).astype('uint8')).save(out, format='png')
         util.state['map_path'] = 'data:image/png;base64,' + out.getvalue().encode('base64').replace('\n', '')
 
 #definitely_obstacle = 0.85
