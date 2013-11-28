@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="UTF-8">
 		<title>commander</title>
-		<script src="/static/js/jquery-1.10.2.min.js"></script>
+		<script src="static/js/jquery-1.10.2.min.js"></script>
 		<style>
 			#photo{
 				float:right;
@@ -195,6 +195,7 @@
 				function updateMap(pos,pTrail,trail){
 					var c=document.getElementById("map");
 					var gr=c.getContext("2d");
+					gr.lineWidth=0.03;
 
 					gr.save();
 					gr.setTransform(1,0,0,1,0,0);
@@ -218,8 +219,8 @@
 					//trail=[[left_arclength,right_arclength],...]
 					//0<=obstacles[i][j]<=1
 					
-					//pos=[400,400]
-					//pTrail=[[429,429],[444,429],[460,481]]
+					pos=[0,0,Math.PI*0.25];
+					pTrail=[[0.52,0.52],[0.52,0.33],[0.72,0.55],[0.55,0.72],[0.55,0.6],[0.52,0.52]];
 					//trail=[[380,380]]
 					
 					var tx=0;
@@ -251,43 +252,66 @@
 							t2=t1;
 						}
 						
-						t1=((2*r*t2)+al-ar)/(2*r);
 						gr.beginPath();
 						
 						if ((al-ar)==0){
-						
-							tx=x+(al*Math.sin(t2)); //updating the position of the end of the curve
-							ty=y-(al*Math.cos(t2));
-						
+							tx=x-(al*Math.cos(t2)); //updating the position of the end of the curve
+							ty=y+(al*Math.sin(t2));
+							t1=t2;
 							gr.moveTo(tx,ty);
 							gr.lineTo(x,y);
 						}
 						
 						else{
+							if (al>ar){
+								t1=((2*r*t2)+al-ar)/(2*r);
 							
-						
-							cx = x+(r*(al+ar)*Math.sin(t2))/Math.abs((al-ar));
-							cy = y+(r*(al+ar)*Math.cos(t2))/Math.abs((al-ar));
+								cx = x+(r*(al+ar)*Math.sin(t2))/Math.abs((al-ar));
+								cy = y+(r*(al+ar)*Math.cos(t2))/Math.abs((al-ar));
+								rb=(r*(al+ar))/Math.abs((al-ar));
+								tt1=(1.5*Math.PI)-((2*r*t2)+al-ar)/(2*r);
+								tt2=(1.5*Math.PI)-t2;
+								
+								tx=cx-(rb*Math.sin(t1));
+								ty=cy-(rb*Math.cos(t1));
+								
+								gr.arc(cx,cy,rb,tt1,tt2);
+							}
 							
-							rb=(r*(al+ar))/Math.abs((al-ar));
-							tt1=(1.5*Math.PI)-((2*r*t2)+al-ar)/(2*r);
-							tt2=(1.5*Math.PI)-t2;
 							
-							tx=cx-(rb*Math.sin(t1));
-							ty=cy-(rb*Math.cos(t1));
-						
-							gr.arc(cx,cy,rb,tt1,tt2,ar>al); //1 is CCW
+							else{
+								t1=((2*r*t2)+al-ar)/(2*r);
+							
+								cx = x-(r*(al+ar)*Math.sin(t2))/Math.abs((al-ar));
+								cy = y-(r*(al+ar)*Math.cos(t2))/Math.abs((al-ar));
+								rb=(r*(al+ar))/Math.abs((al-ar));
+								tt1=(0.5*Math.PI)-((2*r*t2)+al-ar)/(2*r);
+								tt2=(0.5*Math.PI)-t2;
+								
+								tx=cx+(rb*Math.sin(t1));
+								ty=cy+(rb*Math.cos(t1));
+								
+								gr.arc(cx,cy,rb,tt1,tt2,1);
+							}
+							
+							
+							
+							
+							
+							//gr.arc(cx,cy,rb,tt1,tt2); //1 is CCW
 						}
 						
 						
 						gr.stroke();
 						
 						gr.beginPath();
-						gr.arc(tx,ty,r,0,2*Math.PI);
+						//gr.arc(tx,ty,r,0,2*Math.PI);
+						fillCircle(gr,[tx,ty],.05,pp);
 						gr.stroke();
 						
 						gr.beginPath();
-						gr.arc(x,y,r,0,2*Math.PI);
+						//gr.arc(x,y,r,0,2*Math.PI);
+						fillCircle(gr,[x,y],.05,pp);
 						gr.stroke();
 						
 					}		
@@ -296,11 +320,12 @@
 					//	fillCircle(gr,trail[i],3,fp);
 					//}	
 					
-					fillCircle(gr,pos,.14,cp);
+					fillCircle(gr,pos,.05,cp);
 					
 					
 					gr.restore();
 				}
+				updateMap(null,null,null);
 				(function update(){
 					$.post("/battery")
 						.done(function(battery){
