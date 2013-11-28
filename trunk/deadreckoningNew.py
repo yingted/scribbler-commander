@@ -34,6 +34,7 @@ def initialize_deadReckoning():
     '''initializes dead reckoning odometry thread'''    
     global runThread
     reset_deadReckoning()
+    update()
     runThread = True
     dRThread = threading.Thread(target=deadReckoningThread)
     dRThread.start()

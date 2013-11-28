@@ -12,7 +12,10 @@
 				border:1px solid black;
 			}
 			#map{
-			       background:white;
+				height:100%;
+				margin:0 auto;			
+			}
+			#obstacles{
 				height:100%;
 				margin:0 auto;			
 			}
@@ -42,7 +45,7 @@
 				background-color:green;
 			}
 			.disconnected #battery-level{
-			background-color: grey;
+				background-color: grey;
 			}
 			#battery-percent{
 				position:absolute;
@@ -72,9 +75,9 @@
 			}
 			
 			body.noscroll{
-    				position:fixed;
-    				overflow:hidden;
-                     }
+				position:fixed;
+				overflow:hidden;
+			}
 				#photos{
 				position:absolute;
 				right:0;
@@ -145,19 +148,18 @@
 			</div>
 		</form>
 		<div id="map-container">
-			<canvas id="map" width="800" height="800"">
+			<img id="obstacles" height="100%">
+			<canvas id="map" width="800" height="800">
 				cannot show map
 			</canvas>
 		</div>
 		<div id="photos">
 			<ul id="photo-list"></ul>
 
-		</div><!--"-->
+		</div>
 		<div id="templates">
 			<li class="photo-item">
 				<img width="160" height="128">
-		
-				
 			</li>
 		</div>
 		<script>
@@ -327,6 +329,8 @@
 					}).on("where trail",function(){
 						if(state.where)
 							updateMap(state.where,trail.reverse(),[]);
+					}).on("map_path",function(e,data){
+						$("#obstacles").attr("src",data);
 					});
 				var params="";
 				(function subscribe(){
