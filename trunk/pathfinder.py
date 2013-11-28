@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 import numpy # currently unused, should be used for optimization
-from math import hypot
+from math import hypot, atan2
 from heapq import *
 import threading # might not be necessary if thread not started here
 #import util # needed for state object
 from time import sleep
 from model import Map,Prior
+from movement import pi, SCRIBBLER_RADIUS
 
 obstaclemap = Map(Prior(), 40, 40) # XXX dimensions and initial P (currently grid points every 10 cm)
 
@@ -173,6 +174,31 @@ def trace_path(src, dest):
         path.append(cur)
         cur = camefrom[cur]
     return [(obstaclemap.x[i[0]], obstaclemap.y[i[1]]) for i in reversed(path)]
+
+
+def arclength_turn(theta):
+	"""
+	Returns a pair [left, right] describing how far forward each wheel 
+	must move to turn by angle theta CCW
+	"""
+	return (-theta*SCRIBBLER_RADIUS,theta*SCRIBBLER_RADIUS)
+
+def path_to_arclengths(path):
+	p = util.state["where"]
+	out = []
+	heading = p[2]
+	cur = p[:2]
+	for dest in path[1:]: 
+		# turn to target
+		turnby = atan2(dest[0]-cur[0],dest[1]-cur[1])-heading
+		out.append(arclength_turn(turnby))
+		heading += turnby
+		# move to target
+		dist = hypot(dest[0]-cur[0], dest[1]-cur[1])
+		out.append((dist,dist))
+		cur = dest
+	return out
+
 
 def findloops(graph):
     """
