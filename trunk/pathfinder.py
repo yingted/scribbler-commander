@@ -102,30 +102,6 @@ f_score = {start:cost(start,finish)} # estimated total cost to target
 #pathpoints = []
 iterastar = None
 
-<<<<<<< HEAD
-@util.every(50) # has to be turned back into threaded
-def pathfinderThread():
-    """The thread that continually waits on target change and 
-    runs A* whenever a new target is set"""
-    global iterastar, pathpoints
-    # stuff happens
-    if newtarget != finish:
-        start = util.state["where"][:2]
-        # we currently scrap partial paths, which might be useful, 
-        # but that's okay.
-        iterastar = resetAstar(start,newtarget)
-    if newtarget != None and iterastar != None:
-        try:
-            # step once thru A*
-            iterastar()
-        except StopIteration:
-            # A* finished, so we update state
-            trace = trace_path(start, finish)
-            util.state["pathpoints"] = trace
-            util.state["arclengths ahead"] = path_to_arclengths(trace)
-            newtarget = None
-            iterastar = None
-=======
 def initialize_pathfinder():
     @util.every(50) # has to be turned back into threaded
     def pathfinderThread():
@@ -144,10 +120,11 @@ def initialize_pathfinder():
                 iterastar()
             except StopIteration:
                 # A* finished, so we update state
-                util.state["pathpoints"] = trace_path(start, finish)
+                trace = trace_path(start, finish)
+                util.state["pathpoints"] = trace
+                util.state["arclengths ahead"] = path_to_arclengths(trace)
                 newtarget = None
                 iterastar = None
->>>>>>> pathfinder integration
 
 #definitely_obstacle = 0.85
 def neighbors(x,y=None):
