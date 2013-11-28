@@ -103,14 +103,25 @@
 				list-style-type:none;
 			}
 			#search{
-				background:#33CC33;
+				background:#3C3;
+				width: 5em;
+				height:2em;
+				font-size:40px;
+				color: white;
+				margin-bottom: 10px;
+			}
+			#search:hover{
+				background-color: #3F3;
+			}
+			#music{
+				background:#3C9;
 				width: 5em;
 				height:2em;
 				font-size:40px;
 				color: white;
 			}
-			#search:hover{
-				background-color: #3F3;
+			#music:hover{
+				background-color: #3F9;
 			}
 			#templates{
 				display:none;
@@ -149,6 +160,7 @@
 			</fieldset>-->
 			
 			<button type="submit" name="do" value="Search" id="search" title = "Explore the area">Search</button>
+			<button type="submit" name="do" value="Music" id="music" title = "Play music">Music</button>
 			<input type="image" id="camera" name="go" value="photo" src="static/css/camera.png" width="200" height="150" title="Take a picture">
 			<div id="battery">
 				<div id="battery-level"></div>
