@@ -100,7 +100,7 @@ class Map(object):
 		def prob(r):
 			return min(1, max(0, P_r(r) * (1 - P_r_i(r) / scaling)))
 		# calculate radii, set of radii and thetas
-		if P_r_i(.1) > 1e-4 and self.cb:
+		if P_r_i(.1) > 1e-7 and self.cb:
 			self.cb()
 		x = self._x - x0
 		y = self._y - y0
