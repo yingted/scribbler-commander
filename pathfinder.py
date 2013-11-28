@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 import numpy # currently unused, should be used for optimization
-from math import hypot, atan2
+from math import hypot, atan2, pi
 from heapq import *
 import threading # might not be necessary if thread not started here
 #import util # needed for state object
 from time import sleep
 from model import Map,Prior
-from movement import pi, SCRIBBLER_RADIUS
+from movement import SCRIBBLER_RADIUS
 from itertools import *
 from cStringIO import StringIO
 
@@ -34,7 +34,8 @@ def set_target(xy):
 # - call set_target on a target point (grid coords -- not real coords)
 #   to set the target of the A*
 # - once A* finishes, the result path of coordinates is in 
-#	util.state["pathpoints"]
+#	util.state["pathpoints"], and the result list of arlength pairs is in 
+#	util.state["arclengths ahead"]
 #
 # - TODO `cost` and `neighbors` do special things based on the map data -- 
 #   some integration still needs doing
@@ -48,7 +49,7 @@ be restarted with a new target.
 """
 newtarget = None
 
-start = util.state["where"][0],util.state["where"][1]
+start = util.state["where"][:2]
 finish = None
 
 # XXX all of these should probably be stored in state
@@ -67,6 +68,7 @@ def resetAstar(new_start, new_finish):
     closedset = set([])
     camefrom = {}
     util.state["pathpoints"] = []
+    util.state["arclengths ahead"] = []
     if new_finish is None or new_start is None:
         return None
     openset = [(cost(start, finish), start)]
@@ -115,7 +117,9 @@ def pathfinderThread():
             iterastar()
         except StopIteration:
             # A* finished, so we update state
-            util.state["pathpoints"] = trace_path(start, finish)
+            trace = trace_path(start, finish)
+            util.state["pathpoints"] = trace
+            util.state["arclengths ahead"] = path_to_arclengths(trace)
             newtarget = None
             iterastar = None
 
@@ -180,7 +184,7 @@ def trace_path(src, dest):
     """
     Iterate backwards from dest, following came-from links until 
     reaching src. Returns list of points on the path, starting at src, 
-    ending at dest.
+    ending at dest (including dest but not src)
     """
     path = [dest]
     cur = camefrom[dest]
@@ -193,17 +197,22 @@ def trace_path(src, dest):
 
 def arclength_turn(theta):
 	"""
-	Returns a pair [left, right] describing how far forward each wheel 
+	Returns a pair (left, right) describing how far forward each wheel 
 	must move to turn by angle theta CCW
 	"""
 	return (-theta*SCRIBBLER_RADIUS,theta*SCRIBBLER_RADIUS)
 
 def path_to_arclengths(path):
+	"""
+	Returns a list of pairs, each describing the forward length of an arc 
+	traced by each side of the robot.
+	returns [(left_forward, right_forward),...]
+	"""
 	p = util.state["where"]
 	out = []
 	heading = p[2]
 	cur = p[:2]
-	for dest in path[1:]: 
+	for dest in path:
 		# turn to target
 		turnby = atan2(dest[0]-cur[0],dest[1]-cur[1])-heading
 		out.append(arclength_turn(turnby))
