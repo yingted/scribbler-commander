@@ -129,7 +129,7 @@ def initialize_pathfinder():
                 newtarget = None
                 iterastar = None
         else: sleep(7.5)
-    show = cycle([True]+[False]*0)
+    show = cycle([True]+[False]*5)
     @util.every(.1)
     def update_sensors():
         irp = None
