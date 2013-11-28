@@ -7,6 +7,7 @@ ROBOT_DIAMETER = 148.5#Measurement in millimeters
 DEFAULT_DIGITS = 6
 PRINT_COORDINATES = False
 UPDATE_INTERVAL = 0.1#Seconds
+SPEED_CHANGE_SENSITIVITY = 2#in number of update intervals, lower = more sensitive
 runThread = True
 
 x_pos = 0.0#In millimeters
@@ -15,6 +16,7 @@ robotHeading = 0.0
 moveHistory = []
 beginTime = time.time()
 previousTime = time.time()
+lastMove = 0#number of update intervals ago
 
 #resets coordinates
 def reset_deadReckoning():
@@ -37,9 +39,12 @@ def initialize_deadReckoning():
 
 #dead reckoning thread
 def deadReckoningThread():
-    global previousTime
+    global previousTime, lastMove
     while runThread:
         update()
+        lastMove += 1
+        if(len(moveHistory)>SPEED_CHANGE_SENSITIVITY and not withinError(getAverageSpeedSinceLastChange(SPEED_CHANGE_SENSITIVITY),getRecentAverageSpeed(SPEED_CHANGE_SENSITIVITY))):
+            lastMove = 0
         previousTime = time.time()
         if(PRINT_COORDINATES):
             getCoords(DEFAULT_DIGITS)
@@ -80,6 +85,12 @@ def stopThread():
 def getCoords(numberOfDigits=DEFAULT_DIGITS):
     print "(" + str(round(x_pos*0.001,numberOfDigits)) + "," + str(round(y_pos*0.001,numberOfDigits)) + " at angle "+str(round(robotHeading,numberOfDigits))+")"
 
+def withinError(a,b,maxRelativeError):
+    if((b-a)/a<maxRelativeError):
+        return True
+    else:
+        return False
+
 def getX():
     return x_pos*0.001
 
@@ -89,18 +100,45 @@ def getY():
 def getHeading():
     return robotHeading
 
-def getMoveHistory(depth=None):#returns in reverse chronological order
+def getSpeed(move):
+    return (move[0]+move[1])/2.0/move[2]
+
+def convMoveListToSpeed(moveList):
+    speedList = []
+    for move in moveList:
+        speedList.append(getSpeed(move))
+    return speedList
+
+def getAverageSpeedSinceLastChange(begin):
+    speedList = convMoveListToSpeed(getMoveHistory(begin,lastMove))
+    sumSpeed = 0.0
+    for speed in speedList:
+        sumSpeed += speed
+    sumSpeed /= float(len(speedList))
+    return sumSpeed
+
+def getRecentAverageSpeed(numberOfMoves):
+    speedList = convMoveListToSpeed(getMoveHistory(0,numberOfMoves+1))
+    sumSpeed = 0.0
+    for speed in speedList:
+        sumSpeed += speed
+    sumSpeed /= float(len(speedList))
+    return sumSpeed
+
+def getMoveExpected(time):
+    pass#to be edited
+
+def arcLengthToTime(arcLength):#Will use a constant motor value of 1 for now
+    pass#to be edited
+
+def getMoveHistory(begin=0,end=None):#returns in reverse chronological order, end is exclusive
     '''returns list of (left_arclength,right_arclength)'''
     output = []
-    if depth is None:
-        end=0
-    else:
-        end=len(moveHistory)-depth
-    for i in range(len(moveHistory)-1,end-1,-1):
+    if end is None:
+        end=len(moveHistory)
+    for i in range(len(moveHistory)-1-begin,len(moveHistory)-1-end,-1):
         output.append(moveHistory[i])
     return output
 
-
 if __name__=='__main__':
     xp_initialize()
-    
