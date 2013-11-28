@@ -130,7 +130,7 @@ def initialize_pathfinder():
                 iterastar = None
         else: sleep(7.5)
     show = cycle([True]+[False]*4)
-    @util.every(.3)
+    @util.every(.1)
     def update_sensors():
         irp = None
         while irp is None:

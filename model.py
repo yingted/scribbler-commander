@@ -74,7 +74,7 @@ class Map(object):
 		self.w = w
 		self.h = h
 		self.s = 8.
-		self.upsample = 20
+		self.upsample = 5
 		self.m_per_unit = self.s / 40. / self.upsample
 		endpoint = (self.s - self.m_per_unit) / 2
 		w *= self.upsample
@@ -93,9 +93,10 @@ class Map(object):
 		self.d *= self.lambd
 		# use P_r(r) as a cached for P(irp, v, r) 
 		P_r = UnivariateSpline(self.R, exp(array([self.P(irp, v, r) for r in self.R])))
-		scaling = 1. / max(1, P_r.integral(0, self.P._max_r))
+		P_r_i = UnivariateSpline(self.R, array([P_r.integral(0, r) for r in self.R]))
+		scaling = 1. / max(1, P_r_i(self.P._max_r))
 		def prob(r):
-			return P_r(r) * (1 - P_r.integral(0, r) / scaling)
+			return P_r(r) * (1 - P_r_i(r) / scaling)
 		# calculate radii, set of radii and thetas
 		x = self._x - x0
 		y = self._y - y0
