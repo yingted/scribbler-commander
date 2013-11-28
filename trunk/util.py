@@ -94,6 +94,7 @@ def every(seconds, *args, **kwargs):
 	def decorator(f):
 		def update():
 			t = threading.Timer(seconds, update)
+			t.daemon = True
 			f(*args, **kwargs)
 			t.start()
 		update()
