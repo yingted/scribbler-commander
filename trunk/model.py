@@ -1,5 +1,5 @@
 from pickle import load
-from numpy import arange, pi, exp, log, tan, arctan, linspace, around, ndarray, array, ones, mgrid, searchsorted, hypot, arctan2, abs, isnan
+from numpy import arange, pi, exp, log, tan, arctan, linspace, around, ndarray, array, ones, mgrid, searchsorted, hypot, arctan2, abs, isnan, isfinite
 try:
     from scipy.integrate import quad
     from scipy.interpolate import UnivariateSpline
@@ -87,6 +87,7 @@ class Map(object):
 		'''update the map using sensor data
 		x0, y0, theta0 are standard mathematics x, y, theta
 		returns probabilities at self.x and self.y or None on failure'''
+		#self.d[~isfinite(self.d)] = self.log_rho
 		self.d = (self.d - self.log_rho) * self.lambd + self.log_rho
 		H = self.P.v(irp, v)
 		# use P_r(r) as a cached for P(irp, v, r) 
@@ -102,11 +103,14 @@ class Map(object):
 		#E = array([P_r(radius) for radius in radii.flatten()]).reshape(shape)
 		if isnan(E.sum()):
 			E = ones(shape) / E.size#XXX salvage values
-		self.d += exp(self.P.theta(thetas.flatten()).reshape(shape)) * (E - H)
+		k = 20.
+		#print E - H
+		self.d += exp(self.P.theta(thetas.flatten()).reshape(shape)) * (E - H).clip(-k, k)
 		#print v, self.d
 	@property
 	def p(self):
 		'''returns non-log probabilities'''
+		print"Z=",exp(self.d).sum(), exp(self.d)
 		return exp(self.d)
 if __name__=='__main__':
 	from myro import *
