@@ -179,7 +179,7 @@
 				<input id="battery">
 			</fieldset>-->
 			
-			<button type="submit" name="do" value="search" id="search" title="Take a close photo">Examine</button>
+			<!--<button type="submit" name="do" value="search" id="search" title="Take a close photo">Examine</button>-->
 			<button type="submit" name="do" value="music" id="music" title="Beep">Beep</button>
 			<input type="image" id="camera" name="go" value="photo" src="static/css/camera.png" width="150" height="100" title="Take a picture">
 			<div id="battery">
@@ -461,6 +461,9 @@
 						if(e.which==32)
 							$.post("/photo");
 					});
+				$("#camera").click(function(e){
+					$.post("/photo");
+				});
 				$("#map").click(function(e){
 					var pageX=e.clientX+document.body.scrollLeft,pageY=e.clientY+document.body.scrollTop,ofs=$(this).offset();
 					e.preventDefault();

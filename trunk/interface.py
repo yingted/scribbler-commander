@@ -102,7 +102,7 @@ class ScribblerCommander(object):
 		except AttributeError:
 			raise cherrypy.HTTPError(503, 'Service Unavailable')
 	@ajax#XXX handle non-ajax
-	#@util.every(20)
+	@util.every(20)
 	def photo(self=None):
 		try:
 			deltas_change.acquire()
@@ -190,7 +190,7 @@ if __name__=="__main__":
 		},
 	}
 	auth = {
-		'tools.auth_digest.on': True,
+		'tools.auth_digest.on': False,
 		'tools.auth_digest.realm': 'scribbler-commander',
 		'tools.auth_digest.get_ha1': cherrypy.lib.auth_digest.get_ha1_file_htdigest('htdigest'),
 		'tools.auth_digest.key': 'f5d935a764a2d627',
