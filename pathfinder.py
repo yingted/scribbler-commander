@@ -39,7 +39,7 @@ newtarget = None
 def nearest_grid(xy):
     if xy is not None:
         x, y = xy
-        return int(x / obstaclemap.m_per_unit / obstaclemap.upsample + obstaclemap.s / 2), int(y / obstaclemap.m_per_unit / obstaclemap.upsample + obstaclemap.s / 2)
+        return int((x + obstaclemap.s / 2) / obstaclemap.m_per_unit), int((y + obstaclemap.s / 2) / obstaclemap.m_per_unit)
 def set_target(xy):
     '''sets the target to x, y
     returns immediately'''
