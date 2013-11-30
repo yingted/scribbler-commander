@@ -190,7 +190,7 @@ if __name__=="__main__":
 		},
 	}
 	auth = {
-		'tools.auth_digest.on': False,
+		'tools.auth_digest.on': True,
 		'tools.auth_digest.realm': 'scribbler-commander',
 		'tools.auth_digest.get_ha1': cherrypy.lib.auth_digest.get_ha1_file_htdigest('htdigest'),
 		'tools.auth_digest.key': 'f5d935a764a2d627',
